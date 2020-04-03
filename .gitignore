@@ -1,7 +1,6 @@
-node_modules/
 auth.json
-prune.js
 comandos/balear.js
-run.bat
+node_modules/
 package-lock.json
-message.json
+prune.js
+run.bat
