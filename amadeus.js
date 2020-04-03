@@ -1,6 +1,6 @@
 const {Client, Collection} = require("discord.js");
 const {mkdir} = require('fs');
-const {token} = process.env.TOKEN
+const token = process.env.TOKEN
 const client = new Client();
 
 ["filas", "tocando", "comandos", "aliases"].forEach(x => client[x] = new Collection());
