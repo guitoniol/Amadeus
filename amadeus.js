@@ -1,6 +1,6 @@
 const {Client, Collection} = require("discord.js");
 const {mkdir} = require('fs');
-const {token} = require('./auth.json'); // process.evn.TOKEN
+const {token} = process.evn.TOKEN
 const client = new Client();
 
 
