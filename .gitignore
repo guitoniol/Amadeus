@@ -1,4 +1,9 @@
 auth.json
 node_modules/
 package-lock.json
+<<<<<<< HEAD
 run.bat
+=======
+run.bat
+amadeus.js
+>>>>>>> 71470e8c42c7fdae6719fca79657416bbab24ac9
