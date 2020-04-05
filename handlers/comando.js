@@ -6,7 +6,7 @@ module.exports = (client) => {
 
         for(let file of comandos){
             const pull = require(`../comandos/${dirs}/${file}`);            
-            client.comandos.set(pull.config.nome, pull);           
+            client.comandos.set(pull.config.nome.toLowerCase(), pull);           
 
             if(pull.config.aliases)
                 pull.config.aliases.forEach(alias => client.aliases.set(alias, pull.config.nome));
