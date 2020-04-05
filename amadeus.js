@@ -1,6 +1,6 @@
 const {Client, Collection} = require("discord.js");
 const {mkdir} = require('fs');
-const {token} = process.evn.TOKEN
+const {token} = require('./auth.json');//process.evn.TOKEN
 const client = new Client();
 
 
@@ -9,14 +9,14 @@ const client = new Client();
 client["tocando"].set("tocando", "false");
 
 client.on("ready", () => {    
-    console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds`);
+    console.log(`Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds`);
     client.user.setActivity(`+help | não sei o que colocar aqui '-'`);    
-    client.guilds.cache.forEach(g => client["filas"].set(g.id, []))
+    client.guilds.forEach(g => client["filas"].set(g.id, []))
   });
 
 client.on("guildCreate", guild => {
   console.log(`Uma nova guild me adicionou: ${guild}`);
-  client.user.setActivity(`+help | estou em ${client.guilds.cache.size} guilds`);
+  client.user.setActivity(`+help | estou em ${client.guilds.size} guilds`);
   mkdir(`/data/${guild.id}`, { recursive: true }).catch(console.error);
 });
 

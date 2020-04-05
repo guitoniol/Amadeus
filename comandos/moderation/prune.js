@@ -47,7 +47,7 @@ module.exports = {
         
         message.channel.fetchMessages({limit: qntd}).then(messages => 
             message.channel.bulkDelete(messages).then(
-                message.channel.send(`Foram deletadas \`${messages.size}\` mensagens :call_me:`).then(
+                message.channel.send(`Apaguei \`${messages.size}\` mensagens :call_me:`).then(
                     m => m.delete(3000))).catch(err => {
                         console.log(err);
                         message.channel.send("puts deu merda").then(m => m.delete(1500));
