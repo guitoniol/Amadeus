@@ -43,7 +43,8 @@ module.exports = {
         fila = await client.servers.get(message.guild.id).get("fila");
         await fila.push(args[0]);
         
-        Ytdl.getInfo(args[0], (err, info) => {
+        await Ytdl.getInfo(args[0], (err, info) => {
+            console.log(info + "\n" + err);
             let title = info.title;
             let minutes = Math.round(info.length_seconds/60);
             let seconds = info.length_seconds % 60;
