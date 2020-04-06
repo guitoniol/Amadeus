@@ -13,8 +13,11 @@ module.exports = {
     run: async(client, message, args) => {
         return fetch(api)
             .then(response => response.json())
-                .then(json => message.channel.send(":cat:", {embed: {image: {url: json[0].url}}}))
-                    .catch(O_o => {message.channel.send("algo deu errado ;-;"); console.log(O_o)});;
+                .then(json => message.channel.send({file: json[0].url})
+                    .catch(O_o => {
+                        message.channel.send("algo deu errado ;-;"); 
+                        console.log(O_o)
+                    }));
     }
 }
 
