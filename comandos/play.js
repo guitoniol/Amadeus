@@ -44,7 +44,11 @@ module.exports = {
         await fila.push(args[0]);
         
         await Ytdl.getInfo(args[0], (err, info) => {
-            console.log(info + "\n" + err);
+            if(err){
+                console.log(err);
+                return message.channel.send(`Erro '_' \`${err.message}\``)
+            }
+
             let title = info.title;
             let minutes = Math.round(info.length_seconds/60);
             let seconds = info.length_seconds % 60;
