@@ -1,7 +1,7 @@
 const Ytdl = require('ytdl-core');
 
 async function play(client, message){        
-    link = client.servers.get(message.guild.id).get("fila")[0];      
+    link = await client.servers.get(message.guild.id).get("fila")[0];      
     client.servers.get(message.guild.id).set("djID", message.member.id);
     let musica = await Ytdl(link);
     
