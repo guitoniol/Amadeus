@@ -3,7 +3,8 @@ module.exports = {
         nome: "exit",
         descricao: "DESTROI a api",
         sintaxe: "+exit",
-        permitidos: "imi",        
+        permitidos: "imi",
+        ignore: true        
     },
 
     run: async(client, message, args) => {        

@@ -3,7 +3,7 @@ module.exports = {
         nome: "kick",
         descricao: "Expulsa babacas",
         sintaxe: "+kick <usuario>",
-        permitidos: "Moderadores",
+        permitidos: "Mods",
         lvlPermissao: 0x2,           
     },
 

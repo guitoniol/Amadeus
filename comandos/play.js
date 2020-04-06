@@ -1,35 +1,31 @@
 const Ytdl = require('ytdl-core');
 
-function play(client, message) {        
-    link = client["filas"].get(message.guild.id)[0];        
+async function play(client, message){        
+    link = client.servers.get(message.guild.id).get("fila")[0];      
+    client.servers.get(message.guild.id).set("djID", message.member.id);
+    let musica = await Ytdl(link);
+    
+    Ytdl.getInfo(link, (err, info) => {
+        let title = info.title;
+        let minutes = Math.round(info.length_seconds/60);
+        let seconds = info.length_seconds % 60;
+        minutes = minutes < 10? '0' + minutes : ''+minutes;
+        seconds = seconds < 10? '0' + seconds : ''+seconds;
+    
+        message.channel.send(`:musical_note: Tocando **${title} (${minutes}:${seconds})** adicionado por **${message.member.user.username}**`);   
+    })           
 
-    setTimeout(() => {
-        Ytdl.getInfo(link, (err, info) => {
-            let title = info.title;
-            let minutes = Math.round(info.length_seconds/60);
-            let seconds = info.length_seconds % 60;
-            minutes = minutes < 10? '0' + minutes : ''+minutes;
-            seconds = seconds < 10? '0' + seconds : ''+seconds;
-    
-            message.channel.send(`:musical_note: Tocando **${title} (${minutes}:${seconds})** adicionado por **${message.member.user.username}**`);   
-        })   
-    }, 1000); 
-    
-    let musica = Ytdl(link);        
-
-    setTimeout(() => {
-        message.member.voiceChannel.connection.playStream(musica).on('end', () => {
-            client["filas"].get(message.guild.id).shift();            
-            if(client["filas"].get(message.guild.id).length > 0)                     
-                play(client, message);                        
-            else{
-                message.channel.send(":white_check_mark: Fila concluída!")
-                message.member.voiceChannel.leave();
-                client["tocando"].set("tocando", "false");
-            }
-        });                
-    }, 1500);
-    
+    message.member.voiceChannel.connection.playStream(musica).on('end', () => {
+        client.servers.get(message.guild.id).get("fila").shift();            
+        
+        if(client.servers.get(message.guild.id).get("fila").length > 0)                     
+            play(client, message);                        
+        else{
+            message.member.voiceChannel.leave();
+            message.channel.send(":white_check_mark: Fila concluída!")
+            client.servers.get(message.guild.id).set("tocando", false);
+        }
+    });                
 }
 
 module.exports = {
@@ -37,20 +33,25 @@ module.exports = {
         nome: "play",
         descricao: "musica tuts tuts",
         sintaxe: "`+play` <link do youtube>",
-        permitidos: "quem quiser",
+        permitidos: "Membros",
         aliases: ["song"]
     },
 
-    run: async(client, message, args) => {         
+    run: async(client, message, args) => {     
         if(!message.member.voiceChannel) return message.channel.send("você precisa estar em um canal de voz");
+        if(args.length === 0) return message.channel.send("'-'")
         if(!Ytdl.validateURL(args[0])) return message.channel.send("link inválido! (tem que ser do youtube)");
         
-        if(!message.guild.voiceConnection) await message.member.voiceChannel.join()
-            .then(message.channel.send(`:white_check_mark: Sucesso ao conectar em ${message.member.voiceChannel.name}`));                 
+        if(!message.guild.voiceConnection)
+            if(message.member.voiceChannel.joinable) 
+                await message.member.voiceChannel.join().then(
+                    message.channel.send(`:white_check_mark: Sucesso ao conectar em ${message.member.voiceChannel.name}`)
+                );                 
+            else
+                return message.channel.send(`Não foi possível conectar em ${message.member.voiceChannel.name}`)
         
-        client["filas"].get(message.guild.id).push(args[0]);
-        fila = await client["filas"].get(message.guild.id);         
-        
+        fila = await client.servers.get(message.guild.id).get("fila");
+        fila.push(args[0]);
         
         if(fila.length > 1){
             Ytdl.getInfo(args[0], (err, info) => {
@@ -63,9 +64,13 @@ module.exports = {
                 message.channel.send(`:white_check_mark: **${title} (${minutes}:${seconds})** foi adicionado a fila com sucesso!`);
             });            
         }
-                
-        client["tocando"].set("tocando", "true");
-        if(fila.length === 1) try{ play(client, message)} catch(err) {console.log(err); message.channel.send(err)};
+    
+        client.servers.get(message.guild.id).set("tocando", true);
+        if(fila.length === 1) 
+            play(client, message).catch(err => {
+                console.log(err);
+                message.channel.send(`Ops, deu algum problema: \`${err.message}\``);
+            })
+        
     }
 }
-

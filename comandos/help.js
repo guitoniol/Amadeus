@@ -3,14 +3,22 @@ module.exports = {
         nome: "help",
         descricao: "ajuda",
         sintaxe: "+help [comando]",
-        permitidos: "membros",
+        permitidos: "Membros",
         aliases: ["ajuda", "info"]        
     },
 
     run: async(client, message, args) => {             
         let comandos = "";
-        client.comandos.forEach(c => comandos += `\`${c.config.nome}\` `) ;                
-
+        let mods = "";
+        
+        client.comandos.forEach(c => {
+            if(!c.config.ignore)
+                if(c.config.permitidos === "Mods")
+                    mods += `\`${c.config.nome}\` `;
+                else 
+                    comandos += `\`${c.config.nome}\` `;                
+        })
+        
         if(args.length === 0){
             message.channel.send({embed: {
                 color: 16711680,                
@@ -20,8 +28,12 @@ module.exports = {
                 },
                 description: "+help [comando]",            
                 fields: [{
-                    name: "Comandos",
+                    name: "Comandos gerais",
                     value: comandos
+                },
+                {
+                    name: "Moderação",
+                    value: mods
                 },
                 {
                     name: "Interações",

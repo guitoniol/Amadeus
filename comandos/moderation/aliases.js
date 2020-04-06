@@ -1,13 +1,12 @@
-//ee
 const {Collection} = require("discord.js")
 const fs = require('fs');
 
 module.exports = {
     config: {
         nome: "aliases",
-        descricao: "adiciona um alias pro comando (outro nome pra vc usar ele)",
+        descricao: "adiciona um \"apelido\" pro comando (outro nome pra você usar ele)",
         sintaxe: "`+aliases <comando> <alias>`",
-        permitidos: "Administradores"        
+        permitidos: "Mods"        
     },
 
     run: async(client, message, args) => {

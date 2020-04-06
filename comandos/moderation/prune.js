@@ -3,7 +3,7 @@ module.exports = {
         nome: "prune",
         descricao: "limpa mensagens",
         sintaxe: "+prune <n>",
-        permitidos: "Moderadores",
+        permitidos: "Mods",
         aliases: ["delete", "purge", "clear"],
         lvlPermissao: 0x00002000,
     },

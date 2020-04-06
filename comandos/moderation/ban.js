@@ -3,8 +3,8 @@ module.exports = {
         nome: "ban",
         descricao: "Bane pessoas",
         sintaxe: "+ban <@user>",
-        permitidos: "Moderadores",
-        lvlPermissao: 0x4,
+        permitidos: "Mods",
+        lvlPermissao: 0x4,        
     },
 
     run: async(client, message, args) => {        
