@@ -1,19 +1,21 @@
 const Ytdl = require('ytdl-core');
 
 async function play(client, message){        
-    link = await client.servers.get(message.guild.id).get("fila")[0];      
+    link = client.servers.get(message.guild.id).get("fila")[0];      
     client.servers.get(message.guild.id).set("djID", message.member.id);
-    let musica = await Ytdl(link);
+    let musica = Ytdl(link);
     
-    Ytdl.getInfo(link, (err, info) => {
-        let title = info.title;
-        let minutes = Math.round(info.length_seconds/60);
-        let seconds = info.length_seconds % 60;
-        minutes = minutes < 10? '0' + minutes : ''+minutes;
-        seconds = seconds < 10? '0' + seconds : ''+seconds;
-    
-        message.channel.send(`:musical_note: Tocando **${title} (${minutes}:${seconds})** adicionado por **${message.member.user.username}**`);   
-    })           
+    setTimeout(() => {
+        Ytdl.getInfo(link, (err, info) => {
+            let title = info.title;
+            let minutes = Math.round(info.length_seconds/60);
+            let seconds = info.length_seconds % 60;
+            minutes = minutes < 10? '0' + minutes : ''+minutes;
+            seconds = seconds < 10? '0' + seconds : ''+seconds;
+        
+            message.channel.send(`:musical_note: Tocando **${title} (${minutes}:${seconds})** adicionado por **${message.member.user.username}**`);   
+        })
+    }, 1000);     
 
     message.member.voiceChannel.connection.playStream(musica).on('end', () => {
         client.servers.get(message.guild.id).get("fila").shift();            
