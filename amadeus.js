@@ -29,9 +29,4 @@ setInterval(function(){
   client.user.setActivity(`+help | não sei o que colocar aqui '-'`);      
 }, 3000); 
 
-
-setTimeout(() => {
-  console.log(client.servers)
-}, 5000);
-
 client.login(token);

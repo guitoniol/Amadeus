@@ -51,7 +51,7 @@ module.exports = {
                 return message.channel.send(`Não foi possível conectar em ${message.member.voiceChannel.name}`)
         
         fila = await client.servers.get(message.guild.id).get("fila");
-        fila.push(args[0]);
+        await fila.push(args[0]);
         
         if(fila.length > 1){
             Ytdl.getInfo(args[0], (err, info) => {
