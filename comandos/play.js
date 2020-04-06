@@ -15,11 +15,7 @@ async function play(client, message){
             
             message.channel.send(`:musical_note: Tocando **${title} (${minutes}:${seconds})** adicionado por **${message.member.user.username}**`);           
         }, 1000);
-    }).catch(err => {
-        console.log(err);
-        message.channel.send(`Opa deu algum problema :|`)
     })
-    
 
     message.member.voiceChannel.connection.playStream(musica).on('end', () => {
         client.servers.get(message.guild.id).get("fila").shift();            
