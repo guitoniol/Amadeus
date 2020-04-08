@@ -49,8 +49,7 @@ module.exports = {
             let messages = [];
             let before;
             let has14 = false; 
-            let size = 0;
-            let aviso = null;
+            let size = 0;            
 
             await message.channel.fetchMessages({limit: 100}).then(msgs => {
                 if(msgs.last().createdAt.getMonth() < hoje.getMonth || 
@@ -82,7 +81,7 @@ module.exports = {
             }
 
             if(has14){                               
-                aviso = await message.channel.send(`Algumas mensagens não serão deletadas pois foram enviadas a mais de 14 dias, continuar?`);
+                let aviso = await message.channel.send(`Algumas mensagens não serão deletadas pois foram enviadas a mais de 14 dias, continuar?`);
 
                 aviso.react('✅'); 
                 filter = (reaction, user) => (reaction.emoji.name === '✅' || reaction.emoji.name === '❌') && (user.id === message.author.id)
@@ -91,9 +90,11 @@ module.exports = {
                 await aviso.awaitReactions(filter, { time: 7000 }).then(emojo => { 
                     if(emojo.size === 0 || emojo.first()._emoji.name === '❌'){
                         messages = [];
-                        message.channel.send("❌ Comando cancelado!");                                                              
+                        message.channel.send("❌ Comando cancelado!");                                                                                      
                     } 
                 });
+
+                aviso.delete();
             }
 
             if(messages.length > 0){                
@@ -123,8 +124,7 @@ module.exports = {
             return message.channel.send(`Ué: \`${err.message}\``).then(m => m.delete(1500))
         });
 
-        message.channel.send(`Apaguei \`${qntd}\` mensagens :call_me:`).then(m => m.delete(3000))
-        if(aviso !== null) aviso.delete();
+        message.channel.send(`Apaguei \`${qntd}\` mensagens :call_me:`).then(m => m.delete(3000))        
     }
 }   
 
