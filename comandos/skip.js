@@ -12,7 +12,7 @@ module.exports = {
         let skipar = false
         votos = client.servers.get(message.guild.id).get("skipVotes")
 
-        skipar = (message.member.hasPermission("MOVE_MEMBERS") && (message.member.id === client.servers.get(message.guild.id).get("djID")))
+        skipar = (message.member.hasPermission("MOVE_MEMBERS") || (message.member.id === client.servers.get(message.guild.id).get("djID")))
             
         if(!skipar && !(client.servers.get(message.guild.id).get("jaVotou").includes(message.member.id))){
             client.servers.get(message.guild.id).set("skipVotes", ++votos);

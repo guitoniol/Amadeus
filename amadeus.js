@@ -1,7 +1,6 @@
 const {Client, Collection} = require("discord.js");
 const {mkdir} = require('fs');
-//const {token} = require('./auth.json');
-const token = process.env.TOKEN
+const token = process.env.TOKEN || require('./auth.json').token
 const client = new Client();
 
 ["servers", "comandos", "aliases"].forEach(x => client[x] = new Collection());
