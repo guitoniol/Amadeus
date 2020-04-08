@@ -50,7 +50,7 @@ module.exports = {
             let before;
             let has14 = false; 
             let size = 0;
-            let aviso;
+            let aviso = null;
 
             await message.channel.fetchMessages({limit: 100}).then(msgs => {
                 if(msgs.last().createdAt.getMonth() < hoje.getMonth || 
@@ -103,7 +103,7 @@ module.exports = {
                         console.log(err);
                     });
                 })
-                console.log(client.emojis);
+                
                 message.channel.send(`Apaguei \`${size}\` mensagens ${client.emojis.get("604084329311633467")}`).then(m => m.delete(5000))  
             }
 
@@ -124,7 +124,7 @@ module.exports = {
         });
 
         message.channel.send(`Apaguei \`${qntd}\` mensagens :call_me:`).then(m => m.delete(3000))
-        if(aviso) aviso.delete();
+        if(aviso !== null) aviso.delete();
     }
 }   
 
