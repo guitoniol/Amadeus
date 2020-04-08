@@ -37,12 +37,12 @@ module.exports = {
                 },
                 {
                     name: "Interações",
-                    value: "`Bom dia`, `sandri`"
+                    value: "`sandri`"
                 }],
             }}).catch(O_o => console.log(O_o));                    
         }
 
-        if(comandos.indexOf(args[0]) !== -1){
+        if(comandos.indexOf(args[0]) !== -1 || client.comandos.get(client.aliases.get(args[0]))){
             let cmd = client.comandos.get(args[0]) || client.comandos.get(client.aliases.get(args[0]));
 
             message.channel.send({embed: {
