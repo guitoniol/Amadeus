@@ -12,9 +12,8 @@ client.on("ready", () => {
     
     client.guilds.forEach(g => {
       client.servers.set(g.id, new Collection());  
-      client.servers.get(g.id).set("fila", []);
-      client.servers.get(g.id).set("tocando", false);
-      client.servers.get(g.id).set("djID", "");
+      client.servers.get(g.id).set("fila", []); //{link: "", dj: ""}
+      client.servers.get(g.id).set("tocando", false);      
       client.servers.get(g.id).set("skipVotes", 0);
       client.servers.get(g.id).set("jaVotou", []);
     })

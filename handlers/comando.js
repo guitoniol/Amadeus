@@ -13,5 +13,5 @@ module.exports = (client) => {
         }
     }
 
-    ["", "moderation"].forEach(x => load(x));
+    ["", "moderation", "ignore"].forEach(x => load(x));
 }
