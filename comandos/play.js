@@ -37,7 +37,7 @@ module.exports = {
             else
                 return message.channel.send(`Não foi possível conectar em ${message.member.voiceChannel.name}`)
         
-        let fila = await client.servers.get(message.guild.id).get("fila");                
+        let fila = await client.servers.get(message.guild.id).fila;
         let msg = "";
         await fila.push({link: args[0], dj: message.member.id});        
 
