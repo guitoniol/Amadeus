@@ -1,7 +1,6 @@
 const Ytdl = require('ytdl-core');
 
-async function play(client, message){        
-    fila = client.servers.get(message.guild.id).get("fila")    
+async function play(fila, message){            
     let musica = Ytdl(fila[0].link);    
 
     await message.member.voiceChannel.connection.playStream(musica).on('end', () => {
@@ -9,11 +8,10 @@ async function play(client, message){
         
         if(fila.length > 0){                                 
             message.channel.send(fila[0].msg);
-            play(client, message);                        
+            play(fila, message);                        
         } else{
             message.member.voiceChannel.leave();
-            message.channel.send(":white_check_mark: Fila concluída!")
-            client.servers.get(message.guild.id).set("tocando", false);
+            message.channel.send(":white_check_mark: Fila concluída!")            
         }
     });                
 }
@@ -30,10 +28,10 @@ module.exports = {
     run: async(client, message, args) => {     
         if(!message.member.voiceChannel) return message.channel.send("você precisa estar em um canal de voz");
         if(args.length === 0) return message.channel.send(`+play <link> :smile:`);
-        if(!Ytdl.validateURL(args[0])) return message.channel.send("link inválido! **(tem que ser do youtube)**");
+        if(!Ytdl.validateURL(args[0])) return message.channel.send("link inválido! **(tem que ser do youtube)**"); 
         
-        if(!message.guild.voiceConnection)
-            if(message.member.voiceChannel.joinable) 
+        if(!message.guild.voiceConnection) //vendo se já não ta num canal de voz
+            if(message.member.voiceChannel.joinable)
                 await message.member.voiceChannel.join().then(
                     message.channel.send(`:white_check_mark: Sucesso ao conectar em ${message.member.voiceChannel.name}`));                 
             else
@@ -41,9 +39,9 @@ module.exports = {
         
         let fila = await client.servers.get(message.guild.id).get("fila");                
         let msg = "";
-        await fila.push({link: args[0], dj: message.member.id, msg: msg});
+        await fila.push({link: args[0], dj: message.member.id});        
 
-        await Ytdl.getInfo(args[0], (err, info) => {
+        Ytdl.getInfo(args[0], (err, info) => {
             if(err){
                 console.log(err);
                 message.channel.send(`Erro '_' \`${err.message}\``)
@@ -63,10 +61,8 @@ module.exports = {
                 }
             }
         });            
-        
-        if(fila.length > 1) return;
-        
-        client.servers.get(message.guild.id).set("tocando", true);        
-        play(client, message);
+
+        if(fila.length > 1) return;   
+        play(fila, message);
     }
 }

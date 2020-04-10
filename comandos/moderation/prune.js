@@ -103,9 +103,9 @@ module.exports = {
                         message.channel.send(`:< deu erro \`${err.message}\``);
                         console.log(err);
                     });
-                }).then(() => message.channel.send(`Apaguei \`${size}\` mensagens ${client.emojis.get("604084329311633467")}`).then(m => m.delete(5000)))
+                })
                 
-                
+                message.channel.send(`Apaguei \`${size}\` mensagens ${client.emojis.get("604084329311633467")}`).then(m => m.delete(5000))
             }
 
             return;
