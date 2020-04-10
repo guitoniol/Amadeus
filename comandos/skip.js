@@ -10,7 +10,7 @@ module.exports = {
         if(!message.guild.voiceConnection) return message.channel.send("Não estou tocando no momento <:");                                    
         
         let skipar = false        
-        //skipar = (message.member.hasPermission("MOVE_MEMBERS") || (message.member.id === client.servers.get(message.guild.id).fila[0].dj))
+        skipar = (message.member.hasPermission("MOVE_MEMBERS") || (message.member.id === client.servers.get(message.guild.id).fila[0].dj))
             
         if(!skipar && !(client.servers.get(message.guild.id).jaVotou.includes(message.member.id))){
             if(client.servers.get(message.guild.id).skipVotes > 1){

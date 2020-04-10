@@ -39,7 +39,10 @@ module.exports = {
         
         let fila = await client.servers.get(message.guild.id).fila;
         let msg = "";
-        await fila.push({link: args[0], dj: message.member.id});        
+        await fila.push({
+            link: args[0], 
+            dj: message.member.id
+        });        
 
         Ytdl.getInfo(args[0], (err, info) => {
             if(err){
