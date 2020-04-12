@@ -17,13 +17,8 @@ client.on("ready", () => {
 
 client.on("guildCreate", guild => {
   console.log(`Uma nova guild me adicionou: ${guild}`);
-  client.user.setActivity(`+help | estou em ${client.guilds.size} guilds`);
-  mkdir(`/data/${guild.id}`, { recursive: true }).catch(console.error);
+  client.user.setActivity(`+help | estou em ${client.guilds.size} guilds`);  
 });
-
-setInterval(function(){
-  client.user.setActivity(`+help | não sei o que colocar aqui '-'`);      
-}, 3000); 
 
 client.login(token);
 console.log(client.servers)
