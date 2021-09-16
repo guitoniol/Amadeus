@@ -1,19 +1,29 @@
-const Ytdl = require('ytdl-core');
+const ytdl = require('ytdl-core');
 
-async function play(fila, message){            
-    let musica = Ytdl(fila[0].link);    
+function play(guild, serverQueue) {
+  if(serverQueue.songs.length == 0) {
+    serverQueue.textChannel.send("fila concluida");
+    serverQueue.voiceChannel.leave();
+    
+    serverQueue.textChannel = null;
+    serverQueue.voiceChannel = null;
+    serverQueue.connection = null;
+    serverQueue.playing = false;
 
-    await message.member.voiceChannel.connection.playStream(musica).on('end', () => {
-        fila.shift();                    
-        
-        if(fila.length > 0){                                 
-            message.channel.send(fila[0].msg);
-            play(fila, message);                        
-        } else{
-            message.member.voiceChannel.leave();
-            message.channel.send(":white_check_mark: Fila concluída!")            
-        }
-    });                
+    return;
+  }
+  let song = serverQueue.songs[0];
+  const dispatcher = serverQueue.connection
+    .play(ytdl(song.url)).on("finish", () => {
+      serverQueue.songs.shift();
+      play(guild, serverQueue);
+    }).on("error", error => {
+      console.log(error);
+      serverQueue.textChannel.send("erro :X");
+    });
+    
+    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+    serverQueue.textChannel.send(`Start playing: **${song.title}**`);
 }
 
 module.exports = {
@@ -24,48 +34,34 @@ module.exports = {
         permitidos: "Membros",
         aliases: ["song"]
     },
+    
 
-    run: async(client, message, args) => {     
-        if(!message.member.voiceChannel) return message.channel.send("você precisa estar em um canal de voz");
-        if(args.length === 0) return message.channel.send(`+play <link> :smile:`);
-        if(!Ytdl.validateURL(args[0])) return message.channel.send("link inválido! **(tem que ser do youtube)**"); 
+    run: async(client, message, args) => {
+        const voiceChannel = message.member.voice?.channel;
+        const serverQueue = client.servers.get("queue").get(message.guild.id);
         
-        if(!message.guild.voiceConnection) //vendo se já não ta num canal de voz
-            if(message.member.voiceChannel.joinable)
-                await message.member.voiceChannel.join().then(
-                    message.channel.send(`:white_check_mark: Sucesso ao conectar em ${message.member.voiceChannel.name}`));                 
-            else
-                return message.channel.send(`Não foi possível conectar em ${message.member.voiceChannel.name}`)
+        if(!voiceChannel) return message.channel.send("você precisa estar em um canal de voz!");
+        if(serverQueue.voiceChannel && serverQueue.voiceChannel != voiceChannel) return message.channel.send(`Já estou tocando no canal ${serverQueue.voiceChannel.title}.`);
+
+        const songInfo = await ytdl.getInfo(args[0]);
+        const song = {
+            title: songInfo.videoDetails.title,
+            url: songInfo.videoDetails.video_url,
+        };
         
-        let fila = await client.servers.get(message.guild.id).fila;
-        let msg = "";
-        await fila.push({
-            link: args[0], 
-            dj: message.member.id
-        });        
+        try {
+            // Here we try to join the voicechat and save our connection into our object.
+            let connection = await voiceChannel.join();
+            serverQueue.playing = true;
+            serverQueue.textChannel = message.channel;
+            serverQueue.voiceChannel = voiceChannel;
+            serverQueue.connection = connection;
+            serverQueue.songs.push(song);
+            if(serverQueue.songs.length == 1) play(message.guild, serverQueue);
 
-        Ytdl.getInfo(args[0], (err, info) => {
-            if(err){
-                console.log(err);
-                message.channel.send(`Erro '_' \`${err.message}\``)
-            } else {
-                let title = info.title;
-                let minutes = Math.round(info.length_seconds/60);
-                let seconds = info.length_seconds % 60;
-                minutes = minutes < 10? '0' + minutes : ''+minutes;
-                seconds = seconds < 10? '0' + seconds : ''+seconds;
-                msg = `:musical_note: Tocando **${title} (${minutes}:${seconds})** adicionado por **${message.member.user.username}**`
-                
-                if(fila.length > 1) {
-                    fila[fila.length-1].msg = msg;
-                    message.channel.send(`:white_check_mark: **${title} (${minutes}:${seconds})** foi adicionado a fila com sucesso!`);                    
-                } else {
-                    message.channel.send(msg);
-                }
-            }
-        });            
-
-        if(fila.length > 1) return;   
-        play(fila, message);
+           } catch (err) {
+             console.log(err);
+             return message.channel.send("'-'" + err);
+           }        
     }
 }
