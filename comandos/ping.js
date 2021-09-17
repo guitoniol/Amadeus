@@ -8,6 +8,6 @@ module.exports = {
 
     run: async(client, message, args) => {
         const m = await message.channel.send("Ping?");      
-        return m.edit(`Ping: ${m.createdTimestamp - message.createdTimestamp} ms. \nping da API: ${Math.round(client.ping)} ms`);      
+        return m.edit(`Ping: ${m.createdTimestamp - message.createdTimestamp} ms. \nping da API: ${Math.round(client.ws.ping)} ms`);      
     }
 }
