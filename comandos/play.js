@@ -1,10 +1,15 @@
+const { MessageEmbed } = require('discord.js');
 const ytdl = require('ytdl-core');
 
+const embed = new MessageEmbed();
+embed.setColor(16711680);
+embed.setDescription('Hello, this is a slick embed!');
+
 function play(guild, serverQueue) {
-  if(serverQueue.songs.length == 0) {
-    serverQueue.textChannel.send("fila concluida");
+  if (serverQueue.songs.length == 0) {
+    serverQueue.textChannel.send("Fila concluida!");
     serverQueue.voiceChannel.leave();
-    
+
     serverQueue.textChannel = null;
     serverQueue.voiceChannel = null;
     serverQueue.connection = null;
@@ -12,18 +17,21 @@ function play(guild, serverQueue) {
 
     return;
   }
-  let song = serverQueue.songs[0];
-  const dispatcher = serverQueue.connection
+
+  const song = serverQueue.songs[0];
+  serverQueue.connection
     .play(ytdl(song.url)).on("finish", () => {
       serverQueue.songs.shift();
       play(guild, serverQueue);
-    }).on("error", error => {
-      console.log(error);
-      serverQueue.textChannel.send("erro :X");
+    }).on("error", err => {
+      console.log(err);
+      message.channel.send("Algo inesperado aconteceu!" + err);
+      client.comandos.get('limparfila').run(client, message, []);
     });
-    
-    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
-    serverQueue.textChannel.send(`Start playing: **${song.title}**`);
+
+  // dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+  embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
+  serverQueue.textChannel.send(embed);
 }
 
 module.exports = {
@@ -38,30 +46,37 @@ module.exports = {
 
     run: async(client, message, args) => {
         const voiceChannel = message.member.voice?.channel;
+        if(!voiceChannel) 
+          return message.channel.send("Você não está conectado a nenhum canal de voz.");
+
         const serverQueue = client.servers.get("queue").get(message.guild.id);
-        
-        if(!voiceChannel) return message.channel.send("você precisa estar em um canal de voz!");
-        if(serverQueue.voiceChannel && serverQueue.voiceChannel != voiceChannel) return message.channel.send(`Já estou tocando no canal ${serverQueue.voiceChannel.title}.`);
+        if(serverQueue.voiceChannel && serverQueue.voiceChannel != voiceChannel) 
+          return message.channel.send(`Já estou tocando no canal ${serverQueue.voiceChannel.title}.`);
 
         const songInfo = await ytdl.getInfo(args[0]);
         const song = {
             title: songInfo.videoDetails.title,
             url: songInfo.videoDetails.video_url,
+            member: message.member
         };
-        
-        try {
-            // Here we try to join the voicechat and save our connection into our object.
-            let connection = await voiceChannel.join();
-            serverQueue.playing = true;
-            serverQueue.textChannel = message.channel;
-            serverQueue.voiceChannel = voiceChannel;
-            serverQueue.connection = connection;
-            serverQueue.songs.push(song);
-            if(serverQueue.songs.length == 1) play(message.guild, serverQueue);
 
-           } catch (err) {
-             console.log(err);
-             return message.channel.send("'-'" + err);
-           }        
+        serverQueue.songs.push(song);
+        if(!serverQueue.playing) {
+          try {
+              let connection = await voiceChannel.join();
+              serverQueue.playing = true;
+              serverQueue.textChannel = message.channel;
+              serverQueue.voiceChannel = voiceChannel;
+              serverQueue.connection = connection;
+              
+              play(message.guild, serverQueue);
+            } catch (err) {
+              console.log(err);
+              message.channel.send("Algo inesperado aconteceu!" + err);
+              return;
+            }
+        }     
+
+        message.react('✅');
     }
 }
