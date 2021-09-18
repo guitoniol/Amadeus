@@ -23,6 +23,11 @@ function play(guild, serverQueue) {
     .play(ytdl(song.url)).on("finish", () => {
       serverQueue.songs.shift();
       play(guild, serverQueue);
+    }).on("error", err => {
+      console.log(err);
+      serverQueue.textChannel.send("O_o -> " + err);
+      serverQueue.songs.shift();
+      play(guild, serverQueue);
     });
 
   dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
