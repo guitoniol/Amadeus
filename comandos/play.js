@@ -12,6 +12,7 @@ embed.setColor(16711680);
 embed.setDescription('Hello, this is a slick embed!');
 
 function play(guild, serverQueue) {
+  console.log(serverQueue);
   if (serverQueue.songs.length == 0) {
     serverQueue.textChannel.send("Fila concluida!");
     serverQueue.voiceChannel.leave();
@@ -37,8 +38,11 @@ function play(guild, serverQueue) {
     });
 
   dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
-  embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
-  serverQueue.textChannel.send(embed);
+  
+  if(!serverQueue.looping) {
+    embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
+    serverQueue.textChannel.send(embed);
+  }
 }
 
 module.exports = {

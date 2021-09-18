@@ -21,7 +21,7 @@ client.on("ready", () => {
       songs: [],
       volume: 5,
       playing: false,
-      looping: true
+      looping: false
     };    
     
     queue.set(guild[0], queueContruct);
