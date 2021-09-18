@@ -12,36 +12,34 @@ embed.setColor(16711680);
 embed.setDescription('Hello, this is a slick embed!');
 
 function play(guild, serverQueue) {
-  console.log(serverQueue);
-  if (serverQueue.songs.length == 0) {
-    serverQueue.textChannel.send("Fila concluida!");
-    serverQueue.voiceChannel.leave();
+  while(true) {
+    if (serverQueue.songs.length == 0) {
+      serverQueue.textChannel.send("Fila concluida!");
+      serverQueue.voiceChannel.leave();
 
-    serverQueue.textChannel = null;
-    serverQueue.voiceChannel = null;
-    serverQueue.connection = null;
-    serverQueue.playing = false;
-    return;
-  }
+      serverQueue.textChannel = null;
+      serverQueue.voiceChannel = null;
+      serverQueue.connection = null;
+      serverQueue.playing = false;
+      return true;
+    }
 
-  const song = serverQueue.songs[0];
-  dispatcher = serverQueue.connection
-    .play(ytdl(song.url)).on("finish", () => {
-      if(!serverQueue.looping) serverQueue.songs.shift();
+    const song = serverQueue.songs[0];
+    dispatcher = serverQueue.connection
+      .play(ytdl(song.url)).on("finish", () => {
+        if(!serverQueue.looping) serverQueue.songs.shift();
+      }).on("error", err => {
+        console.log(err);
+        serverQueue.textChannel.send("O_o -> " + err);
+        serverQueue.songs.shift();
+      });
 
-      play(guild, serverQueue);
-    }).on("error", err => {
-      console.log(err);
-      serverQueue.textChannel.send("O_o -> " + err);
-      serverQueue.songs.shift();
-      play(guild, serverQueue);
-    });
-
-  dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
-  
-  if(!serverQueue.looping) {
-    embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
-    serverQueue.textChannel.send(embed);
+    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+    
+    if(!serverQueue.looping) {
+      embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
+      serverQueue.textChannel.send(embed);
+    }
   }
 }
 
