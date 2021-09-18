@@ -25,6 +25,7 @@ function play(guild, serverQueue) {
       play(guild, serverQueue);
     });
 
+  dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
   embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
   serverQueue.textChannel.send(embed);
 }
