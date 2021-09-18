@@ -1,5 +1,11 @@
+require('dotenv/config');
 const { MessageEmbed } = require('discord.js');
 const ytdl = require('ytdl-core');
+const {google} = require('googleapis');
+const youtube = google.youtube({
+  version: 'v3',
+  auth: process.env.YOUTUBE
+});
 
 const embed = new MessageEmbed();
 embed.setColor(16711680);
@@ -14,7 +20,6 @@ function play(guild, serverQueue) {
     serverQueue.voiceChannel = null;
     serverQueue.connection = null;
     serverQueue.playing = false;
-
     return;
   }
 
@@ -54,7 +59,23 @@ module.exports = {
         if(serverQueue.voiceChannel && serverQueue.voiceChannel != voiceChannel) 
           return message.channel.send(`Já estou tocando no canal ${serverQueue.voiceChannel.title}.`);
 
-        const songInfo = await ytdl.getInfo(args[0]);
+        let ytUrl = null;
+        if(!ytdl.validateURL(args[0])) {
+          await youtube.search.list({ q: args.join(" "), part: 'snippet', type: 'video', maxResults: 1}).then(res => {
+            let items = res.data?.items;
+            
+            if(items && items.length > 0)
+              ytUrl = `https://youtu.be/${items[0].id.videoId}`;
+            else
+              ytUrl = null;
+          }).catch(error => {
+            console.error(error);
+          });
+        }
+        
+        if(!ytUrl) return;
+        
+        const songInfo = await ytdl.getInfo(ytUrl);
         const song = {
             title: songInfo.videoDetails.title,
             url: songInfo.videoDetails.video_url,
