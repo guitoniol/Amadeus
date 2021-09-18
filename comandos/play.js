@@ -26,7 +26,8 @@ function play(guild, serverQueue) {
   const song = serverQueue.songs[0];
   dispatcher = serverQueue.connection
     .play(ytdl(song.url)).on("finish", () => {
-      serverQueue.songs.shift();
+      if(!serverQueue.looping) serverQueue.songs.shift();
+
       play(guild, serverQueue);
     }).on("error", err => {
       console.log(err);

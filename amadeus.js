@@ -20,7 +20,8 @@ client.on("ready", () => {
       connection: null,
       songs: [],
       volume: 5,
-      playing: false
+      playing: false,
+      looping: true
     };    
     
     queue.set(guild[0], queueContruct);
