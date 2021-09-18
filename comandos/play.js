@@ -23,13 +23,8 @@ function play(guild, serverQueue) {
     .play(ytdl(song.url)).on("finish", () => {
       serverQueue.songs.shift();
       play(guild, serverQueue);
-    }).on("error", err => {
-      console.log(err);
-      message.channel.send("Algo inesperado aconteceu!" + err);
-      client.comandos.get('limparfila').run(client, message, []);
     });
 
-  // dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
   embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
   serverQueue.textChannel.send(embed);
 }
