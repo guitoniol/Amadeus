@@ -31,7 +31,7 @@ client.on("ready", () => {
 
 client.on("guildCreate", guild => {
   console.log(`Uma nova guild me adicionou: ${guild}`);
-  client.user.setActivity(`+help | estou em ${client.guilds.size} guilds`);
+  client.user.setActivity(`+help | estou em ${client.guilds.cache.size} guilds`);
 });
 
 client.login(token);

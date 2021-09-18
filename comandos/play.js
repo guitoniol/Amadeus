@@ -71,7 +71,10 @@ module.exports = {
           }).catch(error => {
             console.error(error);
           });
-        }
+        } else {
+		ytUrl = args[0];		
+
+	}
         
         if(!ytUrl) return;
         
