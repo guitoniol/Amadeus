@@ -1,5 +1,5 @@
 require('dotenv/config');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Guild } = require('discord.js');
 const ytdl = require('ytdl-core');
 const {google} = require('googleapis');
 const youtube = google.youtube({
@@ -11,40 +11,39 @@ const embed = new MessageEmbed();
 embed.setColor(16711680);
 embed.setDescription('Hello, this is a slick embed!');
 
-function play(guild, serverQueue) {
-  if (serverQueue.songs.length == 0) {
-    serverQueue.textChannel.send("Fila concluida!");
-    serverQueue.voiceChannel.leave();
+// async function play(guild, serverQueue) {
+//   if (serverQueue.songs.length == 0) {
+//     serverQueue.textChannel.send("Fila concluida!");
+//     serverQueue.voiceChannel.leave();
 
-    serverQueue.textChannel = null;
-    serverQueue.voiceChannel = null;
-    serverQueue.connection = null;
-    serverQueue.playing = false;
-    return;
-  }
+//     serverQueue.textChannel = null;
+//     serverQueue.voiceChannel = null;
+//     serverQueue.connection = null;
+//     serverQueue.playing = false;
+//     return;
+//   }
 
-  const song = serverQueue.songs[0];
-  let dispatcher = serverQueue.connection
-    .play(ytdl(song.url), {filter: 'audioonly'}).on("finish", () => {
-      if(!serverQueue.looping) serverQueue.songs.shift();
-      
-      dispatcher = null;
-      play(guild, serverQueue);
-    }).on("error", err => {
-      console.log(err);
-      serverQueue.textChannel.send("O_o -> " + err);
-      serverQueue.looping = false;
-      serverQueue.songs.shift();
-      play(guild, serverQueue);
-    });
+//   const song = serverQueue.songs[0];
+//   const dispatcher = serverQueue.connection
+//     .play(ytdl(song.url), {filter: 'audioonly'}).on("finish", () => {
+//       if(!serverQueue.looping) serverQueue.songs.shift();
 
-    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+//       play(guild, serverQueue);
+//     }).on("error", err => {
+//       console.log(err);
+//       serverQueue.textChannel.send("O_o -> " + err);
+//       serverQueue.looping = false;
+//       serverQueue.songs.shift();
+//       play(guild, serverQueue);
+//     });
 
-  if(!serverQueue.looping) {
-    embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
-    serverQueue.textChannel.send(embed);
-  }
-}
+//     dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+
+//   if(!serverQueue.looping) {
+//     embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
+//     serverQueue.textChannel.send(embed);
+//   }
+// }
 
 module.exports = {
     config: {
@@ -98,8 +97,9 @@ module.exports = {
               serverQueue.textChannel = message.channel;
               serverQueue.voiceChannel = voiceChannel;
               serverQueue.connection = connection;
-              
-              play(message.guild, serverQueue);
+
+              //play(message.guild, serverQueue);
+              client.emit("play", message.guild.id);
             } catch (err) {
               console.log(err);
               message.channel.send("Algo inesperado aconteceu!" + err);
