@@ -12,34 +12,37 @@ embed.setColor(16711680);
 embed.setDescription('Hello, this is a slick embed!');
 
 function play(guild, serverQueue) {
-  while(true) {
-    if (serverQueue.songs.length == 0) {
-      serverQueue.textChannel.send("Fila concluida!");
-      serverQueue.voiceChannel.leave();
+  if (serverQueue.songs.length == 0) {
+    serverQueue.textChannel.send("Fila concluida!");
+    serverQueue.voiceChannel.leave();
 
-      serverQueue.textChannel = null;
-      serverQueue.voiceChannel = null;
-      serverQueue.connection = null;
-      serverQueue.playing = false;
-      return true;
-    }
+    serverQueue.textChannel = null;
+    serverQueue.voiceChannel = null;
+    serverQueue.connection = null;
+    serverQueue.playing = false;
+    return;
+  }
 
-    const song = serverQueue.songs[0];
-    dispatcher = serverQueue.connection
-      .play(ytdl(song.url)).on("finish", () => {
-        if(!serverQueue.looping) serverQueue.songs.shift();
-      }).on("error", err => {
-        console.log(err);
-        serverQueue.textChannel.send("O_o -> " + err);
-        serverQueue.songs.shift();
-      });
+  const song = serverQueue.songs[0];
+  let dispatcher = serverQueue.connection
+    .play(ytdl(song.url), {filter: 'audioonly'}).on("finish", () => {
+      if(!serverQueue.looping) serverQueue.songs.shift();
+      
+      dispatcher = null;
+      play(guild, serverQueue);
+    }).on("error", err => {
+      console.log(err);
+      serverQueue.textChannel.send("O_o -> " + err);
+      serverQueue.looping = false;
+      serverQueue.songs.shift();
+      play(guild, serverQueue);
+    });
 
     dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
-    
-    if(!serverQueue.looping) {
-      embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
-      serverQueue.textChannel.send(embed);
-    }
+
+  if(!serverQueue.looping) {
+    embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
+    serverQueue.textChannel.send(embed);
   }
 }
 
@@ -75,9 +78,8 @@ module.exports = {
             console.error(error);
           });
         } else {
-		ytUrl = args[0];		
-
-	}
+          ytUrl = args[0];		
+        }
         
         if(!ytUrl) return;
         
