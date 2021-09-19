@@ -8,6 +8,7 @@ module.exports = {
     },
 
     run: async (client, message, args) => {
+        let avatarURL = null;
         let member = args.length === 0 ? message.author :
             message.mentions ? message.mentions.users.first() : undefined;
 
