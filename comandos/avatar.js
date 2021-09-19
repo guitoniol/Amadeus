@@ -11,11 +11,12 @@ module.exports = {
         let member = args.length === 0 ? message.author :
             message.mentions ? message.mentions.users.first() : undefined;
 
-        if (!member && args[0].toLowerCase() === "server" || args.join(" ").toLowerCase() === message.guild.name.toLowerCase())
+        if (!member && args[0].toLowerCase() === "server" || args.join(" ").toLowerCase() === message.guild.name.toLowerCase()){
             member = message.guild;
-
-        avatarURL = member.avatarURL();
-        guildIcon = message.guild.iconURL();
+            guildIcon = message.guild.iconURL();
+        } else {
+            avatarURL = member?.avatarURL();
+        }
 
         return !member ? message.channel.send("Não consegui encontrar esse membro :/") :
             avatarURL ?
