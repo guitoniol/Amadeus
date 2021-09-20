@@ -20,23 +20,24 @@ module.exports = {
 
         const song = serverQueue.songs[0];
         const dispatcher = serverQueue.connection
-        .play(ytdl(song.url), {filter: 'audioonly'}).on("finish", () => {
-            if(!serverQueue.looping) serverQueue.songs.shift();
-    
-            client.emit("play", guildId);
-        }).on("error", err => {
-            console.log(err);
-            serverQueue.textChannel.send("O_o -> " + err);
-            serverQueue.looping = false;
-            serverQueue.songs.shift();
-            client.emmit("play", guildId);
-        });
+            .play(ytdl(song.url), {filter: 'audioonly'}).on("finish", () => {
+                if(!serverQueue.looping) {
+                    client.emit("finish", guildId);
+                }
+
+                client.emit("play", guildId);
+            }).on("error", err => {
+                console.log(err);
+                serverQueue.textChannel.send("O_o -> " + err);
+                client.emit("finish", guildId);
+                client.emit("play", guildId);
+            });
     
         dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
     
         if(!serverQueue.looping) {
-        embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
-        serverQueue.textChannel.send(embed);
+            embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
+            serverQueue.textChannel.send(embed);
         }
     }
 }

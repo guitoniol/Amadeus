@@ -38,4 +38,9 @@ client.on("play", (guildId) => {
   play(client, guildId);
 });
 
+client.on("finish", (guildId) => {
+  client.servers.get("queue").get(guildId).songs.shift();
+  client.servers.get("queue").get(guildId).looping = false;
+});
+
 client.login(token);
