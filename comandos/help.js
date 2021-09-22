@@ -20,7 +20,7 @@ module.exports = {
         })
         
         if(args.length === 0){
-            message.channel.send({embed: {
+            message.channel.send({embeds: [{
                 color: 16711680,                
                 author: {
                     name: `Ajudinha`,
@@ -37,15 +37,15 @@ module.exports = {
                 },
                 {
                     name: "Interações",
-                    value: "`sandri`"
+                    value: "`sandri`, `sandroca`"
                 }],
-            }}).catch(O_o => console.log(O_o));                    
+            }]}).catch(O_o => console.log(O_o));                    
         }
 
         if(comandos.indexOf(args[0]) !== -1 || client.comandos.get(client.aliases.get(args[0]))){
             let cmd = client.comandos.get(args[0]) || client.comandos.get(client.aliases.get(args[0]));
 
-            message.channel.send({embed: {
+            message.channel.send({embeds: [{
                 color: 16711680,
                 author: {
                     name: `informações sobre o comando ${cmd.config.nome}`,
@@ -68,7 +68,7 @@ module.exports = {
                     text: '<> - parametro obrigatório | [] opcional',
                     icon_url: message.author.avatarURL
                 }
-            }}).catch(O_o => console.log(O_o));  
+            }]}).catch(O_o => console.log(O_o));  
         }
 
     }

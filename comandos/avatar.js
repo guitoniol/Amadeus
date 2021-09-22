@@ -1,3 +1,6 @@
+const { MessageEmbed } = require('discord.js');
+const embed = new MessageEmbed();
+
 module.exports = {
     config: {
         nome: "avatar",
@@ -19,24 +22,20 @@ module.exports = {
             avatarURL = member?.avatarURL();
         }
 
-        return !member ? message.channel.send("Não consegui encontrar esse membro :/") :
-            avatarURL ?
-                message.channel.send({
-                    embed: {
-                        color: 16711680,
-                        title: `Foto de perfil de ${member.username}`,
-                        description: avatarURL.endsWith("?size=2048") ? `[Link direto](${avatarURL})` : `[Link direto](${avatarURL + "?size=2048"})`,
-                        image: { url: avatarURL.endsWith("?size=2048") ? avatarURL : avatarURL + "?size=2048" },
-                    }
-                }).catch(O_o => console.log(O_o))
-                :
-                message.channel.send({
-                    embed: {
-                        color: 16711680,
-                        title: `Icone do servidor`,
-                        description: guildIcon.endsWith("?size=2048") ? `[Link direto](${guildIcon})` : `[Link direto](${guildIcon + "?size=2048"})`,
-                        image: { url: guildIcon.endsWith("?size=2048") ? guildIcon : guildIcon + "?size=2048" },
-                    }
-                }).catch(O_o => console.log(O_o));
+        if(!member) return message.channel.send("Não consegui encontrar esse membro :/");
+
+        if(avatarURL) {
+            embed.color = 16711680;
+            embed.title = `Foto de perfil de ${member.username}`;
+            embed.description = avatarURL.endsWith("?size=2048") ? `[Link direto](${avatarURL})` : `[Link direto](${avatarURL + "?size=2048"})`;
+            embed.image = { url: avatarURL.endsWith("?size=2048") ? avatarURL : avatarURL + "?size=2048" };
+        } else {
+            embed.color = 16711680;
+            embed.title = `Icone do servidor`;
+            embed.description = guildIcon.endsWith("?size=2048") ? `[Link direto](${guildIcon})` : `[Link direto](${guildIcon + "?size=2048"})`;
+            embed.image = { url: guildIcon.endsWith("?size=2048") ? guildIcon : guildIcon + "?size=2048" };
+        }
+
+        return message.channel.send({embeds: [embed]});
     }
 }

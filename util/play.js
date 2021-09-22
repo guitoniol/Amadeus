@@ -1,43 +1,42 @@
 const ytdl = require('ytdl-core');
 const { MessageEmbed } = require('discord.js');
+const { createAudioResource, getVoiceConnection } = require('@discordjs/voice');
+const { OpusEncoder } = require('@discordjs/opus');
 
 module.exports = {
-    play: (client, guildId) => {
+    play: async (client, guildId) => {
         const embed = new MessageEmbed();
         embed.setColor(16711680);
 
         let serverQueue = client.servers.get("queue").get(guildId);
         if (serverQueue.songs.length == 0) {
+
             serverQueue.textChannel.send("Fila concluida!");
-            serverQueue.voiceChannel.leave();
+            serverQueue.player?.stop();
             serverQueue.textChannel = null;
             serverQueue.voiceChannel = null;
-            serverQueue.connection = null;
             serverQueue.playing = false;
-
+            serverQueue.player = null;
+            
+            getVoiceConnection(guildId).destroy();
             return;
         }
 
         const song = serverQueue.songs[0];
-        const dispatcher = serverQueue.connection
-            .play(ytdl(song.url), {filter: 'audioonly'}).on("finish", () => {
-                if(!serverQueue.looping) {
-                    client.emit("finish", guildId);
-                }
+        const stream = ytdl(song.url, 
+            { o: '-', q: '', f: 'bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio', r: '100K', }, 
+            { stdio: ['ignore', 'pipe', 'ignore'] },
+        );
+        const resource = createAudioResource(stream, {
+            inlineVolume: true
+        });
 
-                client.emit("play", guildId);
-            }).on("error", err => {
-                console.log(err);
-                serverQueue.textChannel.send("O_o -> " + err);
-                client.emit("finish", guildId);
-                client.emit("play", guildId);
-            });
-    
-        dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
-    
+        resource.volume.setVolume(0.5);
+        serverQueue.player.play(resource);
+
         if(!serverQueue.looping) {
             embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
-            serverQueue.textChannel.send(embed);
+            serverQueue.textChannel.send({embeds: [embed]});
         }
     }
 }

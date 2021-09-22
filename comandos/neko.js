@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 module.exports = {
     config: {
         nome: "neko",
-        descricao: "meninas de anime com orelha de gato",
+        descricao: "desculpa",
         sintaxe: "`+neko`",
         permitidos: "Membros",        
     },
@@ -12,7 +12,7 @@ module.exports = {
     run: async(client, message, args) => {
         return fetch(api)
             .then(response => response.json())
-                .then(json => message.channel.send({embed: {image: {url: json.neko}}}))
+                .then(json => message.channel.send({embeds: [{image: {url: json.neko}}]}))
                     .catch(O_o => {message.channel.send("algo deu errado ;-;"); console.log(O_o)});;                    
     }                                 
 }

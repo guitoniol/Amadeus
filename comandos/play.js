@@ -1,10 +1,27 @@
 require('dotenv/config');
+const { createAudioPlayer, joinVoiceChannel } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
 const { google } = require('googleapis');
 const youtube = google.youtube({
   version: 'v3',
   auth: process.env.YOUTUBE
 });
+
+const getPlayer = async (client, serverQueue) => {
+  const player = createAudioPlayer();
+
+  player.on("idle", () => {
+    if(!serverQueue.looping) client.emit("finish", serverQueue.textChannel.guildId);
+  });
+  
+  player.on("error", err => {
+    console.log(err);
+    serverQueue.textChannel.send("O_o -> " + err);
+    client.emit("finish", serverQueue.textChannel.guildId);
+  });
+  
+  return player;
+}
 
 module.exports = {
   config: {
@@ -14,10 +31,12 @@ module.exports = {
     permitidos: "Membros",
     aliases: ["song"]
   },
-
+  
 
   run: async (client, message, args) => {
-    const voiceChannel = message.member.voice?.channel;
+    if(args.length == 0) return message.react('❌');
+
+    const voiceChannel = await message.member.voice?.channel;
     if (!voiceChannel)
       return message.channel.send("Você não está conectado a nenhum canal de voz.");
 
@@ -36,7 +55,7 @@ module.exports = {
         });
     }
 
-    if (!ytUrl) return message.react('❌')
+    if (!ytUrl) return message.react('❌');
 
     const songInfo = await ytdl.getInfo(ytUrl);
     const song = {
@@ -48,11 +67,18 @@ module.exports = {
     serverQueue.songs.push(song);
     if (!serverQueue.playing) {
       try {
-        let connection = await voiceChannel.join();
+        const voiceConnection = joinVoiceChannel({
+          channelId: voiceChannel.id,
+          guildId: voiceChannel.guild.id,
+          adapterCreator: voiceChannel.guild.voiceAdapterCreator
+        });
+
         serverQueue.playing = true;
         serverQueue.textChannel = message.channel;
         serverQueue.voiceChannel = voiceChannel;
-        serverQueue.connection = connection;
+        const player = await getPlayer(client, serverQueue);
+        voiceConnection.subscribe(player);
+        serverQueue.player = player;
 
         client.emit("play", message.guild.id);
       } catch (err) {
