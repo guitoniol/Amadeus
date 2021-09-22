@@ -11,6 +11,8 @@ const getPlayer = async (client, serverQueue) => {
   const player = createAudioPlayer();
 
   player.on("idle", () => {
+    if(!serverQueue.playing) return;
+    
     if(!serverQueue.looping) client.emit("finish", serverQueue.textChannel.guildId);
   });
   
