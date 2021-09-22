@@ -20,7 +20,7 @@ const queueContruct = {
 ["comando", "console", "event"].forEach(x => require(`./handlers/${x}`)(client));
 
 client.on("ready", () => {
-  client.user.setActivity(`+help | não sei o que colocar aqui '-'`);
+  client.user.setActivity(`+help | https://i.imgur.com/HjCQeIS.png`);
   console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds`);
 
   for (let guild of client.guilds.cache) {
