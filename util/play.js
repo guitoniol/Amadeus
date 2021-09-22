@@ -14,19 +14,15 @@ module.exports = {
             serverQueue.textChannel.send("Fila concluida!");
             serverQueue.player?.stop();
             serverQueue.textChannel = null;
-            serverQueue.voiceChannel = null;
             serverQueue.playing = false;
             serverQueue.player = null;
-            
+
             getVoiceConnection(guildId).destroy();
             return;
         }
 
         const song = serverQueue.songs[0];
-        const stream = ytdl(song.url, 
-            { o: '-', q: '', f: 'bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio', r: '100K', }, 
-            { stdio: ['ignore', 'pipe', 'ignore'] },
-        );
+        const stream = ytdl(song.url);
         const resource = createAudioResource(stream, {
             inlineVolume: true
         });

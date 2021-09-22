@@ -40,9 +40,17 @@ client.on("play", (guildId) => {
   play(client, guildId);
 });
 
-client.on("finish", (guildId) => {
-  client.servers.get("queue").get(guildId).songs.shift();
-  client.servers.get("queue").get(guildId).looping = false;
+client.on("finish", (guildId, error=false) => {
+  const serverQueue = client.servers.get("queue").get(guildId);
+  if(error) {
+    serverQueue.textChannel.send("O_o -> " + err);
+    serverQueue.looping = false;
+  }
+
+  if(!serverQueue.looping) {
+    serverQueue.songs.shift();
+  }
+  
   play(client, guildId);
 });
 

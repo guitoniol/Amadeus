@@ -1,5 +1,5 @@
 require('dotenv/config');
-const { createAudioPlayer, joinVoiceChannel } = require('@discordjs/voice');
+const { createAudioPlayer, joinVoiceChannel,VoiceConnectionStatus, entersState, getVoiceConnection } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
 const { google } = require('googleapis');
 const youtube = google.youtube({
@@ -11,16 +11,18 @@ const getPlayer = async (client, serverQueue) => {
   const player = createAudioPlayer();
 
   player.on("idle", (err) => {
-    if(err) console.log(err);
     if(!serverQueue.playing) return;
     
-    if(!serverQueue.looping) client.emit("finish", serverQueue.textChannel.guildId);
+    if(err) {
+      console.log(err);
+    }    
+
+    client.emit("finish", serverQueue.textChannel.guildId);
   });
   
   player.on("error", err => {
     console.log(err);
-    serverQueue.textChannel.send("O_o -> " + err);
-    client.emit("finish", serverQueue.textChannel.guildId);
+    client.emit("finish", serverQueue.textChannel.guildId, true);
   });
   
   return player;
@@ -44,8 +46,11 @@ module.exports = {
       return message.channel.send("Você não está conectado a nenhum canal de voz.");
 
     const serverQueue = client.servers.get("queue").get(message.guild.id);
-    if (serverQueue.voiceChannel && serverQueue.voiceChannel != voiceChannel)
-      return message.channel.send(`Já estou tocando no canal ${serverQueue.voiceChannel.title}.`);
+    const connection = getVoiceConnection(message.guild.id);
+    if (connection && connection.joinConfig.channelId != voiceChannel.id) {
+      const connectionChannel = await client.channels.fetch(connection.joinConfig.channelId);
+      return message.channel.send(`Já estou tocando no canal ${connectionChannel.name}.`);
+    }
 
     let ytUrl = args[0];
     if (!ytdl.validateURL(args[0])) {
@@ -76,9 +81,21 @@ module.exports = {
           adapterCreator: voiceChannel.guild.voiceAdapterCreator
         });
 
+        voiceConnection.on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
+          try {
+            await Promise.race([
+              entersState(voiceConnection, VoiceConnectionStatus.Signalling, 5_000),
+              entersState(voiceConnection, VoiceConnectionStatus.Connecting, 5_000),
+            ]);
+            // Seems to be reconnecting to a new channel - ignore disconnect
+          } catch (error) {
+            // Seems to be a real disconnect which SHOULDN'T be recovered from
+            voiceConnection.destroy();
+          }
+        });        
+
         serverQueue.playing = true;
         serverQueue.textChannel = message.channel;
-        serverQueue.voiceChannel = voiceChannel;
         const player = await getPlayer(client, serverQueue);
         voiceConnection.subscribe(player);
         serverQueue.player = player;
