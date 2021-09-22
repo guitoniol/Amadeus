@@ -22,7 +22,7 @@ const getPlayer = async (client, serverQueue) => {
   
   player.on("error", err => {
     console.log(err);
-    client.emit("finish", serverQueue.textChannel.guildId, true);
+    client.emit("finish", serverQueue.textChannel.guildId, err);
   });
   
   return player;

@@ -40,10 +40,10 @@ client.on("play", (guildId) => {
   play(client, guildId);
 });
 
-client.on("finish", (guildId, error=false) => {
+client.on("finish", (guildId, error=null) => {
   const serverQueue = client.servers.get("queue").get(guildId);
   if(error) {
-    serverQueue.textChannel.send("O_o -> " + err);
+    serverQueue.textChannel.send("O_o -> " + error);
     serverQueue.looping = false;
   }
 

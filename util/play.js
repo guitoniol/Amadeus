@@ -1,4 +1,4 @@
-const ytdl = require('ytdl-core');
+const playDl = require('play-dl') //JS importing
 const { MessageEmbed } = require('discord.js');
 const { createAudioResource, getVoiceConnection } = require('@discordjs/voice');
 const { OpusEncoder } = require('@discordjs/opus');
@@ -16,14 +16,14 @@ module.exports = {
             serverQueue.textChannel = null;
             serverQueue.playing = false;
             serverQueue.player = null;
-
             getVoiceConnection(guildId).destroy();
             return;
         }
 
         const song = serverQueue.songs[0];
-        const stream = ytdl(song.url);
-        const resource = createAudioResource(stream, {
+        const stream = await playDl.stream(song.url);
+        const resource = createAudioResource(stream.stream, {
+            inputType : stream.type,
             inlineVolume: true
         });
 
