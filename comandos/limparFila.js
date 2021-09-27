@@ -4,6 +4,7 @@ module.exports = {
         descricao: "limpa a fila de um servidor",
         sintaxe: "`+limparFila`",
         permitidos: "td mundo",
+        aliases: ["clean, clear"]
     },
 
     run: async(client, message, args) => {

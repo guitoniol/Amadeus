@@ -34,7 +34,7 @@ module.exports = {
     descricao: "musica tuts tuts",
     sintaxe: "`+play` <link do youtube>",
     permitidos: "Membros",
-    aliases: ["song"]
+    aliases: ["song, p, jabuticaba"]
   },
   
 
