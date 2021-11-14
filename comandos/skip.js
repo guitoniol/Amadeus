@@ -13,7 +13,7 @@ module.exports = {
         if(!voiceChannel) return message.channel.send("você precisa estar em um canal de voz!");
         if(!serverQueue.playing) return message.channel.send("Não estou tocando no momento <:");                                    
 
-        serverQueue.looping = false;
+        //serverQueue.looping = false;
         serverQueue.player.emit('idle');
         message?.react('✅');
     }
