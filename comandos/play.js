@@ -15,7 +15,7 @@ const getPlayer = async (client, serverQueue) => {
     
     if(err) {
       console.log(err);
-    }    
+    }
 
     client.emit("finish", serverQueue.textChannel.guildId);
   });
