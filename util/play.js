@@ -16,7 +16,6 @@ module.exports = {
             serverQueue.textChannel = null;
             serverQueue.playing = false;
             serverQueue.player = null;
-            serverQueue.looping = false;
             getVoiceConnection(guildId).destroy();
             return;
         }
@@ -33,7 +32,8 @@ module.exports = {
 
         if(!serverQueue.looping || serverQueue.skip) {
             embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
-            serverQueue.textChannel.send({embeds: [embed]});
+            message = serverQueue.textChannel.send({embeds: [embed]});
+            message.react('🔁');
             serverQueue.skip = false;
         }
     }

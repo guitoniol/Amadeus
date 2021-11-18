@@ -9,6 +9,6 @@ module.exports = {
     run: async(client, message, args) => {
         const serverQueue = client.servers.get("queue").get(message.guild.id);
         serverQueue.looping = !serverQueue.looping;
-        message.react('✅');
+        message.react(serverQueue.looping? '✅' : '🔴');
     }                                 
 }
