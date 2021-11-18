@@ -32,7 +32,7 @@ module.exports = {
         if(!serverQueue.looping || serverQueue.skip) {
             embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
             message = await serverQueue.textChannel.send({embeds: [embed]});
-            message.react('🔁');
+            if(serverQueue.looping) message.react('🔁');
             serverQueue.skip = false;
         }
     }
