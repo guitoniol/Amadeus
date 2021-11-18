@@ -1,7 +1,6 @@
 const playDl = require('play-dl') //JS importing
 const { MessageEmbed } = require('discord.js');
 const { createAudioResource, getVoiceConnection } = require('@discordjs/voice');
-const { OpusEncoder } = require('@discordjs/opus');
 
 module.exports = {
     play: async (client, guildId) => {
@@ -32,7 +31,7 @@ module.exports = {
 
         if(!serverQueue.looping || serverQueue.skip) {
             embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
-            message = serverQueue.textChannel.send({embeds: [embed]});
+            message = await serverQueue.textChannel.send({embeds: [embed]});
             message.react('🔁');
             serverQueue.skip = false;
         }
