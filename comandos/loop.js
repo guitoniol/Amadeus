@@ -1,7 +1,7 @@
 module.exports = {
     config: {
         nome: "loop",
-        descricao: "coloca a musica atual em loop pro rhettz chato",
+        descricao: "loop '-'",
         sintaxe: "`+loop`",
         permitidos: "Membros",        
     },
