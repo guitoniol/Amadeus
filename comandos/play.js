@@ -1,30 +1,29 @@
 require('dotenv/config');
-const { createAudioPlayer, joinVoiceChannel,VoiceConnectionStatus, entersState, getVoiceConnection } = require('@discordjs/voice');
-const ytdl = require('ytdl-core');
 const { google } = require('googleapis');
-const youtube = google.youtube({
-  version: 'v3',
-  auth: process.env.YOUTUBE
-});
+const { createAudioPlayer, joinVoiceChannel, VoiceConnectionStatus, entersState, getVoiceConnection } = require('@discordjs/voice');
+const youtube = google.youtube({ version: 'v3', auth: process.env.YOUTUBE });
+const ytdl = require('ytdl-core');
+const resume = require('./resume.js').run;
+const pause = require('./pause.js').run;
 
 const getPlayer = async (client, serverQueue) => {
   const player = createAudioPlayer();
 
   player.on("idle", (err) => {
-    if(!serverQueue.playing) return;
-    
-    if(err) {
+    if (!serverQueue.playing) return;
+
+    if (err) {
       console.log(err);
     }
 
     client.emit("finish", serverQueue.textChannel.guildId);
   });
-  
+
   player.on("error", err => {
     console.log(err);
     client.emit("finish", serverQueue.textChannel.guildId, err);
   });
-  
+
   return player;
 }
 
@@ -36,16 +35,17 @@ module.exports = {
     permitidos: "Membros",
     aliases: ["song", "p", "jabuticaba"]
   },
-  
 
   run: async (client, message, args) => {
-    if(args.length == 0) return message.react('❌');
+    const serverQueue = client.servers.get("queue").get(message.guild.id);
+    if (args.length == 0) {
+      return serverQueue.paused? resume(client, message, args) : pause(client, message, args);
+    }
 
     const voiceChannel = await message.member.voice?.channel;
     if (!voiceChannel)
       return message.channel.send("Você não está conectado a nenhum canal de voz.");
 
-    const serverQueue = client.servers.get("queue").get(message.guild.id);
     const connection = getVoiceConnection(message.guild.id);
     if (connection && connection.joinConfig.channelId != voiceChannel.id) {
       const connectionChannel = await client.channels.fetch(connection.joinConfig.channelId);
@@ -92,7 +92,7 @@ module.exports = {
             // Seems to be a real disconnect which SHOULDN'T be recovered from
             voiceConnection.destroy();
           }
-        });        
+        });
 
         serverQueue.playing = true;
         serverQueue.textChannel = message.channel;

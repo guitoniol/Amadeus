@@ -14,6 +14,7 @@ module.exports = {
         if(!serverQueue.playing) return message.channel.send("Não estou tocando no momento <:");                                    
 
         serverQueue.skip = true;
+        serverQueue.paused = false;
         serverQueue.player.emit('idle');
         message?.react('✅');
     }
