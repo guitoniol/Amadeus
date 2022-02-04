@@ -29,8 +29,8 @@ client.on("ready", () => {
 });
 
 client.on("guildCreate", guild => {
-  client.user.setActivity(`+help | estou em ${client.guilds.cache.size} guilds`);
-  client.servers.get("queue").set(guild[0], queueContruct);
+  console.log(`Uma nova guild me adicionou: ${guild}`);
+  client.servers.get("queue").set(guild.id, queueContruct);
 });
 
 client.on("play", (guildId) => {
