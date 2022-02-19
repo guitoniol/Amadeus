@@ -3,7 +3,8 @@ module.exports = {
         nome: "skip",
         descricao: "skipa a músic que estiver tocando",
         sintaxe: "`+skip`",
-        permitidos: "mods",        
+        permitidos: "mods",
+        aliases: ["stop"]
     },
 
     run: async(client, message, args) => {

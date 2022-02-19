@@ -96,6 +96,7 @@ module.exports = {
 
         serverQueue.playing = true;
         serverQueue.textChannel = message.channel;
+        serverQueue.voiceChannel = voiceChannel;
         const player = await getPlayer(client, serverQueue);
         voiceConnection.subscribe(player);
         serverQueue.player = player;
