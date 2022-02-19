@@ -54,27 +54,29 @@ client.on("finish", (guildId, error = null) => {
 });
 
 client.on('voiceStateUpdate', (oldState, newState) => {
-  const guildId = newState?.guild?.id;
-  if(oldState.member?.user?.bot || !client.servers.get("queue").get(guildId).playing) return;
+  if(oldState.member?.user?.bot || !client.servers.get("queue").get(newState?.guild?.id).playing) return;
 
+  const guildId = newState?.guild?.id;
   const serverQueue = client.servers.get("queue").get(guildId);
   const voiceChannel = serverQueue.voiceChannel;
   const textChannel = serverQueue.textChannel;
-  if (!voiceChannel || voiceChannel.id != oldState.channelId && voiceChannel.id != newState.channelId) return;
 
-  if (voiceChannel.members?.size == 1) {
-    textChannel.send("ME DEIXARAO SOZINHA VOU EMBORA :(");
-    client.servers.get("queue").get(guildId).isAlone = true;
+  if (!voiceChannel || (voiceChannel.id != oldState.channelId && voiceChannel.id != newState.channelId)) return;
 
-    setTimeout(() => {
-      if (!client.servers.get("queue").get(guildId).isAlone) return;
-
-      client.servers.get("queue").get(guildId).songs = [];
-      serverQueue.player.emit('idle');
-    }, 3000);
-  } else {
+  if (voiceChannel.members.filter(member => !member.user?.bot).size > 0) {
     client.servers.get("queue").get(guildId).isAlone = false;
+    return;
   }
+
+  textChannel.send("ME DEIXARAO SOZINHA VOU EMBORA :(");
+  client.servers.get("queue").get(guildId).isAlone = true;
+
+  setTimeout(() => {
+    if (!client.servers.get("queue").get(guildId).isAlone) return;
+
+    client.servers.get("queue").get(guildId).songs = [];
+    serverQueue.player.emit('idle');
+  }, 30000);
 });
 
 client.login(token);
