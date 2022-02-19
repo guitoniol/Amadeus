@@ -64,17 +64,17 @@ client.on('voiceStateUpdate', (oldState, newState) => {
   if (!voiceChannel || (voiceChannel.id != oldState.channelId && voiceChannel.id != newState.channelId)) return;
 
   if (voiceChannel.members.filter(member => !member.user?.bot).size > 0) {
-    client.servers.get("queue").get(guildId).isAlone = false;
+    serverQueue.isAlone = false;
     return;
   }
 
   textChannel.send("ME DEIXARAO SOZINHA VOU EMBORA :(");
-  client.servers.get("queue").get(guildId).isAlone = true;
+  serverQueue.isAlone = true;
 
   setTimeout(() => {
-    if (!client.servers.get("queue").get(guildId).isAlone) return;
+    if (!serverQueue.playing || !serverQueue.isAlone) return;
 
-    client.servers.get("queue").get(guildId).songs = [];
+    serverQueue.songs = [];
     serverQueue.player.emit('idle');
   }, 30000);
 });
