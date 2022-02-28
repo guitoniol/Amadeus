@@ -22,7 +22,7 @@ const queueContruct = {
 ["comando", "console", "event"].forEach(x => require(`./handlers/${x}`)(client));
 
 client.on("ready", () => {
-  for (let guild of client.guilds.cache) queue.set(guild[0], queueContruct);
+  for (let guild of client.guilds.cache) queue.set(guild[0], {... queueContruct});
   client.servers.set("queue", queue);
 
   client.user.setActivity(`+help | https://i.imgur.com/HjCQeIS.png`);
@@ -31,7 +31,7 @@ client.on("ready", () => {
 
 client.on("guildCreate", guild => {
   console.log(`Uma nova guild me adicionou: ${guild}`);
-  client.servers.get("queue").set(guild.id, queueContruct);
+  client.servers.get("queue").set(guild.id, {... queueContruct});
 });
 
 client.on("play", (guildId) => {
