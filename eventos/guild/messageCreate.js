@@ -13,8 +13,7 @@ module.exports = async (client, message) => {
 
         let lvlPermissao = commandFile.config.lvlPermissao;
 
-        return !lvlPermissao || message.member.id === "231524583251902464" ? commandFile.run(client, message, args) : (message.member.permissions & lvlPermissao) !== lvlPermissao ?
-            channel.send("Você não pode usar esse comando :p") : commandFile.run(client, message, args);
+        return !lvlPermissao || (message.member.permissions & lvlPermissao) == lvlPermissao? commandFile.run(client, message, args) : channel.send("Você não pode usar esse comando :p");
     };
 
     if (message.content.toLowerCase() === "sandri")
