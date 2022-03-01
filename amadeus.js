@@ -5,24 +5,26 @@ const token = process.env.TOKEN;
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
 
 const queue = new Map();
-const queueContruct = {
-  textChannel: null,
-  voiceChannel: null,
-  connection: null,
-  player: null,
-  songs: [],
-  volume: 5,
-  playing: false,
-  looping: false,
-  paused: false,
-  isAlone: false
-};
-
 ["servers", "comandos", "aliases"].forEach(x => client[x] = new Collection());
 ["comando", "console", "event"].forEach(x => require(`./handlers/${x}`)(client));
 
 client.on("ready", () => {
-  for (let guild of client.guilds.cache) queue.set(guild[0], {... queueContruct});
+  for (let guild of client.guilds.cache) {
+    const queueContruct = {
+      textChannel: null,
+      voiceChannel: null,
+      connection: null,
+      player: null,
+      songs: [],
+      volume: 5,
+      playing: false,
+      looping: false,
+      paused: false,
+      isAlone: false
+    };
+
+    queue.set(guild[0], queueContruct);
+  }
   client.servers.set("queue", queue);
 
   client.user.setActivity(`+help | https://i.imgur.com/HjCQeIS.png`);
@@ -30,8 +32,20 @@ client.on("ready", () => {
 });
 
 client.on("guildCreate", guild => {
-  console.log(`Uma nova guild me adicionou: ${guild}`);
-  client.servers.get("queue").set(guild.id, {... queueContruct});
+  const queueContruct = {
+    textChannel: null,
+    voiceChannel: null,
+    connection: null,
+    player: null,
+    songs: [],
+    volume: 5,
+    playing: false,
+    looping: false,
+    paused: false,
+    isAlone: false
+  };
+
+  client.servers.get("queue").set(guild.id, queueContruct);
 });
 
 client.on("play", (guildId) => {
