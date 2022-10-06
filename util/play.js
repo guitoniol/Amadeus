@@ -19,14 +19,15 @@ module.exports = {
             return;
         }
 
-        let throwError = true;
+        let throwError = false;
         try {
             if (serverQueue.songs.length == 0) {
-                resolvePlaylistUrl(serverQueue.lastPlaylist, serverQueue.lastMember, serverQueue);
+                await resolvePlaylistUrl(serverQueue.lastPlaylist, serverQueue.lastMember, serverQueue);
             }
 
             const song = serverQueue.songs[0];
-            const stream = await playDl.stream(song.url).catch(err => throwError = false);
+            const stream = await playDl.stream(song.url);
+            throwError = true;
             const resource = createAudioResource(stream.stream, {
                 inputType : stream.type,
                 inlineVolume: true
