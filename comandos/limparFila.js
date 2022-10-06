@@ -10,6 +10,7 @@ module.exports = {
     run: async(client, message, args) => {
         const serverQueue = client.servers.get("queue").get(message.guild.id);
         serverQueue.songs = [];
+        serverQueue.lastPlaylist = null;
 
         message?.react('✅');
     }
