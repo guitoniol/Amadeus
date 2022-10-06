@@ -41,16 +41,15 @@ const resolveVideoUrl = async (proxy, member, serverQueue, query) => {
     serverQueue.songs.push(...songs);
 }
 
-const resolvePlaylistUrl = async (playlistId, member, serverQueue) => {  
-    let requestOptions = {
-      playlistId,
+const resolvePlaylistUrl = async (proxy, member, serverQueue) => {  
+  let songs = [];
+  let requestOptions = {
+      playlistId: proxy.list,
       part: 'contentDetails, snippet', 
       maxResults: 50
     };
 
-    if (serverQueue.pageToken) {
-      requestOptions.pageToken = serverQueue.pageToken;
-    }
+    if (serverQueue.pageToken) requestOptions.pageToken = serverQueue.pageToken;
 
     await youtube.playlistItems.list(requestOptions).then(res => {
       serverQueue.pageToken = res.data?.nextPageToken;
@@ -62,8 +61,19 @@ const resolvePlaylistUrl = async (playlistId, member, serverQueue) => {
       }));
     });
 
+    if(proxy.v) {
+      let index = songs.findIndex(songInfo => (songInfo.url.indexOf(proxy.v) != -1));
+
+      if(index != -1) {
+        const songInfo = songs.splice(index, 1)[0];
+        songs.splice(0, 0, songInfo);
+      } else {
+        await resolveVideoUrl(proxy, member, serverQueue);
+      }
+    }
+
     serverQueue.songs.push(...songs);
-    serverQueue.lastPlaylist = playlistId;
+    serverQueue.lastPlaylist = proxy.playlistId;
     serverQueue.lastMember = member;
     console.log(serverQueue.songs.length)
   }
@@ -98,7 +108,7 @@ module.exports = {
     });
 
     if(proxy.list) {
-      await resolvePlaylistUrl(proxy.list, message.member, serverQueue);
+      await resolvePlaylistUrl(proxy, message.member, serverQueue);
     } else {
       await resolveVideoUrl(proxy, message.member, serverQueue, args.join(" "));
     }
