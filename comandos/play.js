@@ -1,20 +1,18 @@
 require('dotenv/config');
+
 const { google } = require('googleapis');
 const { createAudioPlayer, joinVoiceChannel, VoiceConnectionStatus, entersState, getVoiceConnection } = require('@discordjs/voice');
-const youtube = google.youtube({ version: 'v3', auth: process.env.YOUTUBE });
 const ytdl = require('ytdl-core');
 const resume = require('./resume.js').run;
 const pause = require('./pause.js').run;
+const youtube = google.youtube({ version: 'v3', auth: process.env.YOUTUBE });
 
 const getPlayer = async (client, serverQueue) => {
   const player = createAudioPlayer();
 
   player.on("idle", (err) => {
     if (!serverQueue.playing) return;
-
-    if (err) {
-      console.log(err);
-    }
+    if (err) console.log(err);
 
     client.emit("finish", serverQueue.textChannel.guildId);
   });
