@@ -2,7 +2,6 @@ require('dotenv/config');
 
 const { google } = require('googleapis');
 const { createAudioPlayer, joinVoiceChannel, VoiceConnectionStatus, entersState, getVoiceConnection } = require('@discordjs/voice');
-const ytdl = require('ytdl-core');
 const resume = require('./resume.js').run;
 const pause = require('./pause.js').run;
 const youtube = google.youtube({ version: 'v3', auth: process.env.YOUTUBE });
@@ -24,6 +23,50 @@ const getPlayer = async (client, serverQueue) => {
 
   return player;
 }
+
+const resolveVideoUrl = async (proxy, member, serverQueue, query) => {  
+  let songs = [];
+  const q = proxy.v? proxy.v : query;
+  const type = "video";
+
+  await youtube.search.list({q, type, part: 'snippet',  maxResults: 1})
+    .then(res => {
+      songs = res.data?.items.map(songInfo => new Object({
+        title: songInfo.snippet.title,
+        url: `https://youtu.be/${songInfo.id.videoId}`,
+        member
+      }));
+    });
+
+    serverQueue.songs.push(...songs);
+}
+
+const resolvePlaylistUrl = async (playlistId, member, serverQueue) => {  
+    let requestOptions = {
+      playlistId,
+      part: 'contentDetails, snippet', 
+      maxResults: 50
+    };
+
+    if (serverQueue.pageToken) {
+      requestOptions.pageToken = serverQueue.pageToken;
+    }
+
+    await youtube.playlistItems.list(requestOptions).then(res => {
+      serverQueue.pageToken = res.data?.nextPageToken;
+
+      songs = res.data?.items.map(songInfo => new Object({
+        title: songInfo.snippet.title,
+        url: `https://youtu.be/${songInfo.contentDetails.videoId}`,
+        member
+      }));
+    });
+
+    serverQueue.songs.push(...songs);
+    serverQueue.lastPlaylist = playlistId;
+    serverQueue.lastMember = member;
+    console.log(serverQueue.songs.length)
+  }
 
 module.exports = {
   config: {
@@ -50,27 +93,19 @@ module.exports = {
       return message.channel.send(`Já estou tocando no canal ${connectionChannel.name}.`);
     }
 
-    let ytUrl = args[0];
-    if (!ytdl.validateURL(args[0])) {
-      await youtube.search.list({ q: args.join(" "), part: 'snippet', type: 'video', maxResults: 1 })
-        .then(res => {
-          let items = res.data?.items;
-          ytUrl = items && items.length > 0 ? `https://youtu.be/${items[0].id.videoId}` : null;
-        }).catch(error => {
-          console.error(error);
-        });
+    const proxy = new Proxy(new URLSearchParams(args[0].split("?").pop()), {
+      get: (searchParams, prop) => searchParams.get(prop),
+    });
+
+    if(proxy.list) {
+      await resolvePlaylistUrl(proxy.list, message.member, serverQueue);
+    } else {
+      await resolveVideoUrl(proxy, message.member, serverQueue, args.join(" "));
     }
 
-    if (!ytUrl) return message.react('❌');
+    if (!serverQueue.songs.length) 
+      return message.react('❌');    
 
-    const songInfo = await ytdl.getInfo(ytUrl);
-    const song = {
-      title: songInfo.videoDetails.title,
-      url: songInfo.videoDetails.video_url,
-      member: message.member
-    };
-
-    serverQueue.songs.push(song);
     if (!serverQueue.playing) {
       try {
         const voiceConnection = joinVoiceChannel({
@@ -108,5 +143,7 @@ module.exports = {
     }
 
     message.react('✅');
-  }
-}
+  }, 
+
+  resolvePlaylistUrl: resolvePlaylistUrl
+};

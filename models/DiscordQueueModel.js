@@ -8,6 +8,9 @@ class DiscordQueueModel {
     playing;
     looping;
     paused;
+    pageToken;
+    lastPlaylist;
+    lastMember;
 
     constructor() {
         this.textChannel = null;
@@ -19,6 +22,9 @@ class DiscordQueueModel {
         this.playing = false;
         this.looping = false;
         this.paused = false;
+        this.pageToken = null;
+        this.lastPlaylist = null;
+        this.lastMember = null;
     }
 }
 
