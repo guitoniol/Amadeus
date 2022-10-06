@@ -47,36 +47,35 @@ const resolvePlaylistUrl = async (proxy, member, serverQueue) => {
       playlistId: proxy.list,
       part: 'contentDetails, snippet', 
       maxResults: 50
-    };
+  };
 
-    if (serverQueue.pageToken) requestOptions.pageToken = serverQueue.pageToken;
+  if (serverQueue.pageToken) requestOptions.pageToken = serverQueue.pageToken;
 
-    await youtube.playlistItems.list(requestOptions).then(res => {
-      serverQueue.pageToken = res.data?.nextPageToken;
+  await youtube.playlistItems.list(requestOptions).then(res => {
+    serverQueue.pageToken = res.data?.nextPageToken;
 
-      songs = res.data?.items.map(songInfo => new Object({
-        title: songInfo.snippet.title,
-        url: `https://youtu.be/${songInfo.contentDetails.videoId}`,
-        member
-      }));
-    });
+    songs = res.data?.items.map(songInfo => new Object({
+      title: songInfo.snippet.title,
+      url: `https://youtu.be/${songInfo.contentDetails.videoId}`,
+      member
+    }));
+  });
 
-    if(proxy.v) {
-      let index = songs.findIndex(songInfo => (songInfo.url.indexOf(proxy.v) != -1));
+  if(proxy.v) {
+    let index = songs.findIndex(songInfo => (songInfo.url.indexOf(proxy.v) != -1));
 
-      if(index != -1) {
-        const songInfo = songs.splice(index, 1)[0];
-        songs.splice(0, 0, songInfo);
-      } else {
-        await resolveVideoUrl(proxy, member, serverQueue);
-      }
+    if(index != -1) {
+      const songInfo = songs.splice(index, 1)[0];
+      songs.splice(0, 0, songInfo);
+    } else {
+      await resolveVideoUrl(proxy, member, serverQueue);
     }
-
-    serverQueue.songs.push(...songs);
-    serverQueue.lastPlaylist = proxy.playlistId;
-    serverQueue.lastMember = member;
-    console.log(serverQueue.songs.length)
   }
+
+  serverQueue.songs.push(...songs);
+  serverQueue.lastPlaylist = proxy.playlistId;
+  serverQueue.lastMember = member;
+}
 
 module.exports = {
   config: {
