@@ -73,7 +73,7 @@ const resolvePlaylistUrl = async (proxy, member, serverQueue) => {
   }
 
   serverQueue.songs.push(...songs);
-  serverQueue.lastPlaylist = proxy.playlistId;
+  serverQueue.lastPlaylist = proxy.list;
   serverQueue.lastMember = member;
 }
 

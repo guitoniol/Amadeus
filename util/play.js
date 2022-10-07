@@ -1,7 +1,7 @@
 const playDl = require('play-dl') //JS importing
 const { MessageEmbed } = require('discord.js');
 const { createAudioResource, getVoiceConnection } = require('@discordjs/voice');
-const { resolvePlaylistUrl } = require("../comandos/play");
+const DiscordQueueModel = require("../models/DiscordQueueModel");
 
 module.exports = {
     play: async (client, guildId) => {
@@ -9,25 +9,18 @@ module.exports = {
         embed.setColor(16711680);
 
         let serverQueue = client.servers.get("queue").get(guildId);
-        if (serverQueue.songs.length == 0 && !serverQueue.pageToken) {
-            serverQueue.textChannel.send("Fila concluida!");
-            serverQueue.player?.stop();
-            serverQueue.textChannel = null;
-            serverQueue.playing = false;
-            serverQueue.player = null;
+        if (serverQueue.songs.length == 0) {
             getVoiceConnection(guildId).destroy();
+            serverQueue.player?.stop();
+            client.servers.get("queue").set(guildId, new DiscordQueueModel());
+
+            serverQueue.textChannel.send("Fila concluida!");
             return;
         }
 
-        let throwError = false;
+        const song = serverQueue.songs[0];
         try {
-            if (serverQueue.songs.length == 0) {
-                await resolvePlaylistUrl(serverQueue.lastPlaylist, serverQueue.lastMember, serverQueue);
-            }
-
-            const song = serverQueue.songs[0];
             const stream = await playDl.stream(song.url);
-            throwError = true;
             const resource = createAudioResource(stream.stream, {
                 inputType : stream.type,
                 inlineVolume: true
@@ -38,19 +31,16 @@ module.exports = {
 
             if(!serverQueue.looping || serverQueue.skip) {
                 embed.setDescription(`Tocando: [${song.title}](${song.url}) [${song.member}]`);
-                message = await serverQueue.textChannel.send({embeds: [embed]});
+                let message = await serverQueue.textChannel.send({embeds: [embed]});
+
                 if(serverQueue.looping) message.react('🔁');
+
                 serverQueue.skip = false;
             }
         } catch(err) {
-            const song = serverQueue.songs[0];
+            const msg = err.message;
             console.log(song.url, song.title, err);
-
-            if(throwError) {
-                serverQueue.pageToken = null;
-            }
-
-            client.emit("finish", guildId, throwError? err : null);
+            client.emit("finish", guildId, msg.indexOf("Video unavailable") == -1? msg : null);
         }
     }
 }

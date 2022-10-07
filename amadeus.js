@@ -1,9 +1,10 @@
 require('dotenv/config');
 const { Client, Collection, Intents } = require("discord.js");
 const { play } = require("./util/play");
+const { resolvePlaylistUrl } = require("./comandos/play");
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
 const DiscordQueueModel = require("./models/DiscordQueueModel")
 const token = process.env.TOKEN;
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
 
 const queue = new Map();
 ["servers", "comandos", "aliases"].forEach(x => client[x] = new Collection());
@@ -25,17 +26,24 @@ client.on("play", (guildId) => {
   play(client, guildId);
 });
 
-client.on("finish", (guildId, error = null) => {
+client.on("finish", async (guildId, error = null) => {
   const serverQueue = client.servers.get("queue").get(guildId);
 
   if (error) {
     serverQueue.textChannel.send("O_o -> " + error);
+
     serverQueue.looping = false;
+    serverQueue.songs = [];
+    serverQueue.lastPlaylist = null;
+    serverQueue.pageToken = null;
   }
 
   if (!serverQueue.looping || serverQueue.skip) {
     serverQueue.songs.shift();
   }
+  if(serverQueue.songs.length == 0 && serverQueue.pageToken) {
+    await resolvePlaylistUrl({ list: serverQueue.lastPlaylist }, serverQueue.lastMember, serverQueue);
+  }  
 
   play(client, guildId);
 });
