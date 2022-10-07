@@ -38,7 +38,7 @@ const resolveVideoUrl = async (proxy, member, serverQueue, query) => {
       }));
     });
 
-    if(!songs) throw 'Invalid query.';
+    if(!songs.length) throw 'Invalid query.';
   
     serverQueue.songs.push(...songs);
   }
@@ -74,7 +74,7 @@ const resolvePlaylistUrl = async (proxy, member, serverQueue) => {
     }
   }
 
-  if(!songs) throw 'Invalid query.';
+  if(!songs.length) throw 'Invalid query.';
 
   serverQueue.songs.push(...songs);
   serverQueue.lastPlaylist = proxy.list;
