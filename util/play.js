@@ -3,18 +3,25 @@ const { MessageEmbed } = require('discord.js');
 const { createAudioResource, getVoiceConnection } = require('@discordjs/voice');
 const DiscordQueueModel = require("../models/DiscordQueueModel");
 
+const destroyVoiceConnection = (client, guildId) => {
+    client.servers.get("queue").set(guildId, new DiscordQueueModel());
+
+    setTimeout(() => {
+        if(client.servers.get("queue").get(guildId).playing) return;
+        
+        getVoiceConnection(guildId)?.destroy();
+    }, 120000);
+}
+
 module.exports = {
     play: async (client, guildId) => {
         const embed = new MessageEmbed();
         embed.setColor(16711680);
 
         let serverQueue = client.servers.get("queue").get(guildId);
-        if (serverQueue.songs.length == 0) {
-            getVoiceConnection(guildId)?.destroy();
+        if (!serverQueue.songs.length) {
             serverQueue.player?.stop();
-            client.servers.get("queue").set(guildId, new DiscordQueueModel());
-
-            serverQueue.textChannel.send("Fila concluida!");
+            destroyVoiceConnection(client, guildId);
             return;
         }
 

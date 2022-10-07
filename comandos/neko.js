@@ -1,5 +1,5 @@
 const api = "https://nekos.life/api/neko";// "https://nekos.life/api/v2/img/meow";
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 module.exports = {
     config: {
