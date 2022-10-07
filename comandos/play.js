@@ -38,8 +38,10 @@ const resolveVideoUrl = async (proxy, member, serverQueue, query) => {
       }));
     });
 
+    if(!songs) throw 'Invalid query.';
+  
     serverQueue.songs.push(...songs);
-}
+  }
 
 const resolvePlaylistUrl = async (proxy, member, serverQueue) => {  
   let songs = [];
@@ -72,6 +74,8 @@ const resolvePlaylistUrl = async (proxy, member, serverQueue) => {
     }
   }
 
+  if(!songs) throw 'Invalid query.';
+
   serverQueue.songs.push(...songs);
   serverQueue.lastPlaylist = proxy.list;
   serverQueue.lastMember = member;
@@ -87,14 +91,14 @@ module.exports = {
   },
 
   run: async (client, message, args) => {
+    const voiceChannel = await message.member.voice?.channel;
+    if (!voiceChannel)
+      return message.channel.send("Você não está conectado a nenhum canal de voz.");
+
     const serverQueue = client.servers.get("queue").get(message.guild.id);
     if (args.length == 0) {
       return serverQueue.paused? resume(client, message, args) : pause(client, message, args);
     }
-
-    const voiceChannel = await message.member.voice?.channel;
-    if (!voiceChannel)
-      return message.channel.send("Você não está conectado a nenhum canal de voz.");
 
     const connection = getVoiceConnection(message.guild.id);
     if (connection && connection.joinConfig.channelId != voiceChannel.id) {
@@ -106,14 +110,12 @@ module.exports = {
       get: (searchParams, prop) => searchParams.get(prop),
     });
 
-    if(proxy.list) {
-      await resolvePlaylistUrl(proxy, message.member, serverQueue);
-    } else {
-      await resolveVideoUrl(proxy, message.member, serverQueue, args.join(" "));
-    }
-
-    if (!serverQueue.songs.length) 
+    try {
+      await proxy.list? resolvePlaylistUrl(proxy, message.member, serverQueue) : 
+                        resolveVideoUrl(proxy, message.member, serverQueue, args.join(" "));
+    } catch(err) {
       return message.react('❌');    
+    }
 
     if (!serverQueue.playing) {
       try {
@@ -139,9 +141,8 @@ module.exports = {
         serverQueue.playing = true;
         serverQueue.textChannel = message.channel;
         serverQueue.voiceChannel = voiceChannel;
-        const player = await getPlayer(client, serverQueue);
-        voiceConnection.subscribe(player);
-        serverQueue.player = player;
+        serverQueue.player = await getPlayer(client, serverQueue);
+        voiceConnection.subscribe(serverQueue.player);
 
         client.emit("play", message.guild.id);
       } catch (err) {
