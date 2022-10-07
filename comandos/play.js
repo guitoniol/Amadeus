@@ -43,7 +43,7 @@ const resolveVideoUrl = async (proxy, member, serverQueue, query) => {
     serverQueue.songs.push(...songs);
   }
 
-const resolvePlaylistUrl = async (proxy, member, serverQueue) => {  
+const resolvePlaylistUrl = async (proxy, member, serverQueue) => {
   let songs = [];
   let requestOptions = {
       playlistId: proxy.list,
@@ -81,6 +81,12 @@ const resolvePlaylistUrl = async (proxy, member, serverQueue) => {
   serverQueue.lastMember = member;
 }
 
+const resolveProxy = async (proxy, member, serverQueue, query) => {
+    if(proxy.list) return await resolvePlaylistUrl(proxy, member, serverQueue);
+
+    return await resolveVideoUrl(proxy, member, serverQueue, query);
+}
+
 module.exports = {
   config: {
     nome: "play",
@@ -111,8 +117,7 @@ module.exports = {
     });
 
     try {
-      await proxy.list? resolvePlaylistUrl(proxy, message.member, serverQueue) : 
-                        resolveVideoUrl(proxy, message.member, serverQueue, args.join(" "));
+      await resolveProxy(proxy, message.member, serverQueue, args.join(" "));
     } catch(err) {
       return message.react('❌');    
     }
