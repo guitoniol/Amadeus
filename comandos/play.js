@@ -133,6 +133,8 @@ module.exports = {
 
         voiceConnection.on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
           try {
+            if (newState.status == 'disconnected') throw 'disconnected';
+
             await Promise.race([
               entersState(voiceConnection, VoiceConnectionStatus.Signalling, 5_000),
               entersState(voiceConnection, VoiceConnectionStatus.Connecting, 5_000),
@@ -141,8 +143,7 @@ module.exports = {
           } catch (error) {
             // Seems to be a real disconnect which SHOULDN'T be recovered from
             voiceConnection.destroy();
-            client.servers.get("queue").set(guildId, new DiscordQueueModel());
-            return;
+            client.servers.get("queue").set(voiceChannel.guild.id, new DiscordQueueModel());
           }
         });
 
