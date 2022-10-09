@@ -21,10 +21,4 @@ module.exports = async (client, message) => {
             return;
         }
     };
-
-    if (message.content.toLowerCase() === "sandri")
-        message.channel.send("fofo");
-    else if (message.content.toLowerCase() === "sandroca")
-        message.channel.send("sandroga");
 }
-

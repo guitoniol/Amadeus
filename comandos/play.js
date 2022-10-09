@@ -2,6 +2,7 @@ require('dotenv/config');
 
 const { google } = require('googleapis');
 const { createAudioPlayer, joinVoiceChannel, VoiceConnectionStatus, entersState, getVoiceConnection } = require('@discordjs/voice');
+const DiscordQueueModel = require("../models/DiscordQueueModel");
 const resume = require('./resume.js').run;
 const pause = require('./pause.js').run;
 const youtube = google.youtube({ version: 'v3', auth: process.env.YOUTUBE });
@@ -140,6 +141,8 @@ module.exports = {
           } catch (error) {
             // Seems to be a real disconnect which SHOULDN'T be recovered from
             voiceConnection.destroy();
+            client.servers.get("queue").set(guildId, new DiscordQueueModel());
+            return;
           }
         });
 
