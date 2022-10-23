@@ -27,17 +27,22 @@ const getPlayer = async (client, serverQueue) => {
 
 const resolveVideoUrl = async (proxy, member, serverQueue, query) => {  
   let songs = [];
-  const q = proxy.v? proxy.v : query;
-  const type = "video";
+  const options = { type: "video", part: "snippet", maxResults: 1 };
+  let res;
 
-  await youtube.search.list({q, type, part: 'snippet',  maxResults: 1})
-    .then(res => {
-      songs = res.data?.items.map(songInfo => new Object({
-        title: songInfo.snippet.title,
-        url: `https://youtu.be/${songInfo.id.videoId}`,
-        member
-      }));
-    });
+  if(proxy.v) {
+    options["id"] = proxy.v;
+    res = await youtube.videos.list(options);
+  } else {
+    options["q"] = query;
+    res = await youtube.search.list(options);
+  }
+
+  songs = res.data?.items.map(songInfo => new Object({
+    title: songInfo.snippet.title,
+    url: `https://youtu.be/${proxy.v? proxy.v : songInfo.id.videoId}`,
+    member
+  }));
 
     if(!songs.length) throw 'Invalid query.';
   
@@ -113,7 +118,8 @@ module.exports = {
       return message.channel.send(`Já estou tocando no canal ${connectionChannel.name}.`);
     }
 
-    const proxy = new Proxy(new URLSearchParams(args[0].split("?").pop()), {
+    const query = args[0].indexOf("youtu.be/") != -1? "v=" + args[0].split("/").pop() : args[0].split("?").pop();
+    const proxy = new Proxy(new URLSearchParams(query), {
       get: (searchParams, prop) => searchParams.get(prop),
     });
 
