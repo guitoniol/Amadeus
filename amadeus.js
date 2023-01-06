@@ -1,5 +1,5 @@
 require('dotenv/config');
-const { Client, Collection, Intents } = require("discord.js");
+const { Client, Collection, Intents, NewsChannel } = require("discord.js");
 const { play } = require("./util/play");
 const { resolvePlaylistUrl } = require("./comandos/play");
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
@@ -47,5 +47,13 @@ client.on("finish", async (guildId, error = null) => {
 
   play(client, guildId);
 });
+
+client.on("channelUpdate", async(oldChannel, newChannel) => {
+  if(oldChannel.id != "760886552610996295") return; 
+
+  if(oldChannel.rawPosition == newChannel.rawPosition) return; 
+
+  newChannel?.send("Um crime ocorreu.")
+}) 
 
 client.login(token);
